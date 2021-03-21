@@ -1,0 +1,17 @@
+$border: 1px solid #3b3e70;
+
+.board{
+  margin: 50px;
+  border-left: $border;
+  border-top: $border;
+  width: min-content;
+
+  .row{
+    display: flex;
+
+    .cell{
+      border-bottom: $border;
+      border-right: $border;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+@use "../maze-board.component";
+$size: 20px;
+
+.square{
+  width: $size;
+  height: $size;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
