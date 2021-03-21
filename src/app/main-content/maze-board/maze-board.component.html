@@ -1,7 +1,7 @@
 <div class="board" #board>
   <div class="row" *ngFor="let row of boardSquares">
     <ng-container *ngFor="let square of row">
-      <div class="cell">
+      <div class="cell" [ngClass]="{'finish': square.finish, 'start': square.start}">
         <app-maze-square #cmp [state]="square.animation"></app-maze-square>
       </div>
     </ng-container>
