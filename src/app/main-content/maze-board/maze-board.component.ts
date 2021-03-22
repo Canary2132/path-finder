@@ -12,6 +12,7 @@ import {
 import {fromEvent} from 'rxjs';
 import {MouseEventService} from './mouse-event.service';
 import {MazeSquareComponent} from './maze-square/maze-square.component';
+import {GraphCreator} from '../../shared/graph-creator';
 
 @Component({
   selector: 'app-maze-board',
@@ -33,6 +34,8 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private rowsAmount = 30;
   private cellsAmount = 50;
 
+  private graph: Map<any, any>;
+
   constructor(private mouseEvent: MouseEventService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
@@ -47,6 +50,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     }
     this.addMouseEvents();
 
+    this.graph = GraphCreator.fromBoard(this.boardSquares);
     this.dijkstraAlgrithm();
   }
 
@@ -65,22 +69,14 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   dijkstraAlgrithm() {
-    let quary = [];
+    let unvisitedVertices = [];
     let distances = new Map();
     let previous = new Map();
 
-    this.boardSquares.forEach((row, rowIndex) => {
-      row.forEach((el, i) => {
-        el.row = rowIndex;
-        el.col = i;
-      });
-    });
-
-    const graph = this.boardSquares.flat();
-    graph.forEach((el, i) => {
+    Array.from(this.graph.keys()).forEach((el, i) => {
       distances.set(el, null);
       previous.set(el, null);
-      quary.push(el);
+      unvisitedVertices.push(el);
 
       if (i === 51){
         distances.set(el, 0);
@@ -91,20 +87,16 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.boardSquares[10][1].finish = true;
 
     let i = 0;
-    while (quary.length) {
-      const cur = quary.sort((a, b) => {
-        if (distances.get(a) === null) return 1;
-        if (distances.get(b) === null) return -1;
-        return distances.get(a) - distances.get(b);
-      })[0];
+    while (unvisitedVertices.length) {
+      const cur = this.getClosestVertex(unvisitedVertices, distances);
 
       setTimeout(() => {
         cur.animation = 'passed';
         this.cd.detectChanges();
-      }, i * 100)
+      }, i * 100);
 
 
-      quary = quary.filter(el => el !== cur);
+      unvisitedVertices = unvisitedVertices.filter(el => el !== cur);
 
       if (cur.finish) {
         let path = cur;
@@ -119,18 +111,23 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
         }
         return;
       }
-
       i++;
 
-      const neighbors = this.getVertexNeighbors(cur);
-
-      neighbors.forEach(el => {
-        if (!distances.get(el) && quary.find(exist => exist === el)) {
+      this.graph.get(cur).forEach(el => {
+        if (!distances.get(el) && unvisitedVertices.find(exist => exist === el)) {
           distances.set(el, 1);
           previous.set(el, cur);
         }
-      })
+      });
     }
+  }
+
+  private getClosestVertex(vertices, distances) {
+    return vertices.sort((a, b) => {
+      if (distances.get(a) === null) return 1;
+      if (distances.get(b) === null) return -1;
+      return distances.get(a) - distances.get(b);
+    })[0];
   }
 
   private getVertexNeighbors(vertex) {
