@@ -1,3 +1,4 @@
-<div class="square"  [@square]='state'>
+<div class="square"  [@square]='state'
+     [ngClass]="{'start': state === 'start', 'finish': state === 'finish'}">
 
 </div>

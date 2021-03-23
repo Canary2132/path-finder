@@ -1,7 +1,17 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, NgZone, OnInit} from '@angular/core';
 import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
-import {MouseEventService} from '../mouse-event.service';
+import {MouseEventService, MouseState} from '../mouse-event.service';
 import {fromEvent} from 'rxjs';
+
+export enum SquareState {
+  start = 'start',
+  finish = 'finish',
+  passed = 'passed',
+  wall = 'wall',
+  empty = 'empty',
+  optimalPath = 'optimalPath'
+}
+
 
 @Component({
   selector: 'app-maze-square',
@@ -14,7 +24,7 @@ import {fromEvent} from 'rxjs';
         background: '#61d6ff',
         transform: 'scale(1.0)'
       })),
-      transition('* => passed', [
+      transition('empty => passed', [
         animate('1.2s', keyframes([
           style({
             background: '#bf72ff',
@@ -47,7 +57,7 @@ import {fromEvent} from 'rxjs';
       state('wall', style({
         background: '#141b56',
       })),
-      transition('* => wall', [
+      transition('empty => wall', [
         animate('0.4s', keyframes([
           style({
             background: '#0ff1e9',
@@ -84,13 +94,35 @@ import {fromEvent} from 'rxjs';
             offset: 0.9
           })
         ]))
-      ])
+      ]),
+      state('optimalPath', style({
+        background: '#ffde21',
+      })),
+      transition('passed => optimalPath', [
+        animate('0.4s', keyframes([
+          style({
+            background: '#fdf678',
+            transform: 'scale(0.1)',
+            offset: 0.1
+          }),
+          style({
+            background: '#ffa621',
+            transform: 'scale(1.3)',
+            offset: 0.6
+          }),
+          style({
+            background: '#ffde21',
+            transform: 'scale(1)',
+            offset: 0.9
+          })
+        ]))
+      ]),
     ])
   ]
 })
 export class MazeSquareComponent implements OnInit {
 
-  @Input() state;
+  @Input() state: SquareState;
 
 
   constructor(private mouseEvent: MouseEventService, private zone: NgZone, private thisElement: ElementRef, private cd: ChangeDetectorRef) { }
@@ -98,26 +130,51 @@ export class MazeSquareComponent implements OnInit {
   ngOnInit(): void {
     this.zone.runOutsideAngular(() => {
       const enter$ = fromEvent(this.thisElement.nativeElement, 'mouseenter');
+      const leave$ = fromEvent(this.thisElement.nativeElement, 'mouseleave');
       const down$ = fromEvent(this.thisElement.nativeElement, 'mousedown');
 
       enter$.subscribe((e: MouseEvent) => {
         e.preventDefault();
-        if (this.mouseEvent.mouseState === 'btnPressed') {
-          this.changeSquareView();
+        if (this.mouseEvent.mouseState === MouseState.btnPressed) {
+          if (this.state === SquareState.start || this.state === SquareState.finish) {
+            return;
+          }
+          this.state = this.state === SquareState.wall ? SquareState.empty : SquareState.wall;
+        } else if (this.mouseEvent.mouseState === MouseState.dragStartBadge) {
+          this.state = SquareState.start;
+        } else if (this.mouseEvent.mouseState === MouseState.dragFinishBadge) {
+          this.state = SquareState.finish;
+        }
+        this.cd.detectChanges();
+      });
+
+      leave$.subscribe((e: MouseEvent) => {
+        e.preventDefault();
+        if ((this.mouseEvent.mouseState === MouseState.dragStartBadge ||
+        this.mouseEvent.mouseState === MouseState.dragFinishBadge) &&
+          (this.state === SquareState.start || this.state === SquareState.finish)) {
+          this.state = SquareState.empty;
+          this.cd.detectChanges();
         }
       });
 
       down$.subscribe((e: MouseEvent) => {
         e.preventDefault();
-        this.mouseEvent.mouseState = 'btnPressed';
-        this.changeSquareView();
+        if (this.state === SquareState.start) {
+          this.mouseEvent.mouseState = MouseState.dragStartBadge;
+        } else if (this.state === SquareState.finish) {
+          this.mouseEvent.mouseState = MouseState.dragFinishBadge;
+        } else {
+          this.mouseEvent.mouseState = MouseState.btnPressed;
+          this.changeSquareView();
+        }
       });
     });
 
   }
 
   changeSquareView() {
-    this.state = this.state === 'wall' ? 'empty' : 'wall';
+    this.state = this.state === SquareState.wall ? SquareState.empty : SquareState.wall;
     this.cd.detectChanges();
   }
 

@@ -10,9 +10,10 @@ import {
   ViewChildren
 } from '@angular/core';
 import {fromEvent} from 'rxjs';
-import {MouseEventService} from './mouse-event.service';
-import {MazeSquareComponent} from './maze-square/maze-square.component';
+import {MouseEventService, MouseState} from './mouse-event.service';
+import {MazeSquareComponent, SquareState} from './maze-square/maze-square.component';
 import {GraphCreator} from '../../shared/graph-creator';
+import {delayTimer} from '../../shared/helper';
 
 @Component({
   selector: 'app-maze-board',
@@ -25,11 +26,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   @ViewChild('board', {static: true}) board: ElementRef;
   @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
   boardSquares: {
-    animation: string,
-    [key: string]: any}[][];
-
-  start;
-  finish;
+    state: string}[][];
 
   private rowsAmount = 30;
   private cellsAmount = 50;
@@ -45,73 +42,65 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < this.rowsAmount; i++) {
       this.boardSquares[i] = [];
       for (let j = 0; j < this.cellsAmount; j++) {
-        this.boardSquares[i][j] = {animation: ''};
+        this.boardSquares[i][j] = {state: SquareState.empty};
       }
     }
     this.addMouseEvents();
+    this.setDefaultPath();
 
     this.graph = GraphCreator.fromBoard(this.boardSquares);
-    this.dijkstraAlgrithm();
+  }
+
+  private setDefaultPath(): void {
+    this.boardSquares[10][10].state = SquareState.start;
+    this.boardSquares[10][13].state = SquareState.finish;
   }
 
   ngAfterViewInit(): void {
     // console.log(this.comp.toArray());
   }
 
-  addMouseEvents() {
+  addMouseEvents(): void {
     const up$ = fromEvent(document, 'mouseup');
 
     up$.subscribe((e: MouseEvent) => {
       e.preventDefault();
-      console.log('up');
-      this.mouseEvent.mouseState = 'btnReleased';
+      this.mouseEvent.mouseState = MouseState.btnReleased;
     });
   }
 
-  dijkstraAlgrithm() {
+  async dijkstraAlgorithm() {
     let unvisitedVertices = [];
     let distances = new Map();
     let previous = new Map();
 
     Array.from(this.graph.keys()).forEach((el, i) => {
-      distances.set(el, null);
+      distances.set(el, el.state === SquareState.start ? 0 : null);
       previous.set(el, null);
       unvisitedVertices.push(el);
-
-      if (i === 51){
-        distances.set(el, 0);
-        el.start = true;
-      }
     });
 
-    this.boardSquares[10][1].finish = true;
-
-    let i = 0;
     while (unvisitedVertices.length) {
       const cur = this.getClosestVertex(unvisitedVertices, distances);
 
-      setTimeout(() => {
-        cur.animation = 'passed';
-        this.cd.detectChanges();
-      }, i * 100);
-
+      cur.state = cur.state === SquareState.empty ? SquareState.passed : cur.state;
+      this.cd.detectChanges();
+      await delayTimer(100);
 
       unvisitedVertices = unvisitedVertices.filter(el => el !== cur);
 
-      if (cur.finish) {
+      if (cur.state === SquareState.finish) {
         let path = cur;
         while (path) {
           const a = path;
-          setTimeout(() => {
-            a.animation = 'wall';
-            this.cd.detectChanges();
-          }, i * 100)
+          console.log('a.state', a.state)
+          a.state = a.state === SquareState.passed ? SquareState.optimalPath : a.state;
+          this.cd.detectChanges();
+          await delayTimer(100);
           path = previous.get(path);
-          i++;
         }
         return;
       }
-      i++;
 
       this.graph.get(cur).forEach(el => {
         if (!distances.get(el) && unvisitedVertices.find(exist => exist === el)) {
@@ -128,14 +117,6 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
       if (distances.get(b) === null) return -1;
       return distances.get(a) - distances.get(b);
     })[0];
-  }
-
-  private getVertexNeighbors(vertex) {
-    let nextRow = vertex.row < this.rowsAmount - 1 ? [this.boardSquares[vertex.row + 1][vertex.col]] : [];
-    let prevRow = vertex.row > 0 ? [this.boardSquares[vertex.row - 1][vertex.col]] : [];
-    let nextCol = vertex.col < this.cellsAmount - 1 ? [this.boardSquares[vertex.row][vertex.col + 1]] : [];
-    let prevCol = vertex.col > 0 ? [this.boardSquares[vertex.row][vertex.col - 1]] : [];
-    return nextRow.concat(...nextCol, ...prevCol, ...prevRow);
   }
 
 }

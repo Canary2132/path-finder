@@ -1,10 +1,11 @@
+<button (click)="dijkstraAlgorithm()">Find path</button>
+
 <div class="board" #board>
   <div class="row" *ngFor="let row of boardSquares">
     <ng-container *ngFor="let square of row">
-      <div class="cell" [ngClass]="{'finish': square.finish, 'start': square.start}">
-        <app-maze-square #cmp [state]="square.animation"></app-maze-square>
+      <div class="cell">
+        <app-maze-square #cmp [state]="square.state"></app-maze-square>
       </div>
     </ng-container>
   </div>
-
 </div>
