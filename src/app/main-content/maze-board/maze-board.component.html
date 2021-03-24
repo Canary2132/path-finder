@@ -4,7 +4,7 @@
   <div class="row" *ngFor="let row of boardSquares">
     <ng-container *ngFor="let square of row">
       <div class="cell">
-        <app-maze-square #cmp [state]="square.state"></app-maze-square>
+        <app-maze-square #cmp [(state)]="square.state"></app-maze-square>
       </div>
     </ng-container>
   </div>

@@ -15,6 +15,8 @@ import {MazeSquareComponent, SquareState} from './maze-square/maze-square.compon
 import {GraphCreator} from '../../shared/graph-creator';
 import {delayTimer} from '../../shared/helper';
 
+const ANIMATION_DELAY = 10;
+
 @Component({
   selector: 'app-maze-board',
   templateUrl: './maze-board.component.html',
@@ -47,8 +49,6 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     }
     this.addMouseEvents();
     this.setDefaultPath();
-
-    this.graph = GraphCreator.fromBoard(this.boardSquares);
   }
 
   private setDefaultPath(): void {
@@ -74,6 +74,8 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     let distances = new Map();
     let previous = new Map();
 
+    this.graph = GraphCreator.fromBoard(this.boardSquares);
+
     Array.from(this.graph.keys()).forEach((el, i) => {
       distances.set(el, el.state === SquareState.start ? 0 : null);
       previous.set(el, null);
@@ -85,7 +87,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
       cur.state = cur.state === SquareState.empty ? SquareState.passed : cur.state;
       this.cd.detectChanges();
-      await delayTimer(100);
+      await delayTimer(ANIMATION_DELAY);
 
       unvisitedVertices = unvisitedVertices.filter(el => el !== cur);
 
@@ -93,10 +95,9 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
         let path = cur;
         while (path) {
           const a = path;
-          console.log('a.state', a.state)
           a.state = a.state === SquareState.passed ? SquareState.optimalPath : a.state;
           this.cd.detectChanges();
-          await delayTimer(100);
+          await delayTimer(ANIMATION_DELAY);
           path = previous.get(path);
         }
         return;

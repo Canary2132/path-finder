@@ -1,7 +1,19 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, NgZone, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  Input,
+  NgZone,
+  OnInit,
+  Output
+} from '@angular/core';
 import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
 import {MouseEventService, MouseState} from '../mouse-event.service';
 import {fromEvent} from 'rxjs';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 export enum SquareState {
   start = 'start',
@@ -122,7 +134,8 @@ export enum SquareState {
 })
 export class MazeSquareComponent implements OnInit {
 
-  @Input() state: SquareState;
+  @Input() state: any;
+  @Output() stateChange: EventEmitter<any> = new EventEmitter<any>();
 
 
   constructor(private mouseEvent: MouseEventService, private zone: NgZone, private thisElement: ElementRef, private cd: ChangeDetectorRef) { }
@@ -145,6 +158,7 @@ export class MazeSquareComponent implements OnInit {
         } else if (this.mouseEvent.mouseState === MouseState.dragFinishBadge) {
           this.state = SquareState.finish;
         }
+        this.stateChange.emit(this.state);
         this.cd.detectChanges();
       });
 
@@ -154,6 +168,7 @@ export class MazeSquareComponent implements OnInit {
         this.mouseEvent.mouseState === MouseState.dragFinishBadge) &&
           (this.state === SquareState.start || this.state === SquareState.finish)) {
           this.state = SquareState.empty;
+          this.stateChange.emit(this.state);
           this.cd.detectChanges();
         }
       });
@@ -166,16 +181,13 @@ export class MazeSquareComponent implements OnInit {
           this.mouseEvent.mouseState = MouseState.dragFinishBadge;
         } else {
           this.mouseEvent.mouseState = MouseState.btnPressed;
-          this.changeSquareView();
+          this.state = this.state === SquareState.wall ? SquareState.empty : SquareState.wall;
+          this.stateChange.emit(this.state);
+          this.cd.detectChanges();
         }
       });
     });
 
-  }
-
-  changeSquareView() {
-    this.state = this.state === SquareState.wall ? SquareState.empty : SquareState.wall;
-    this.cd.detectChanges();
   }
 
 }

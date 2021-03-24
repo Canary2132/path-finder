@@ -1,3 +1,5 @@
+import {SquareState} from '../main-content/maze-board/maze-square/maze-square.component';
+
 export class GraphCreator {
   private static graph = new Map();
 
@@ -37,8 +39,10 @@ export class GraphCreator {
   }
 
   private static addEdge(v,w): void {
-    this.graph.get(v).add(w);
-    this.graph.get(w).add(v);
+    if (v.state !== SquareState.wall && w.state !== SquareState.wall){
+      this.graph.get(v).add(w);
+      this.graph.get(w).add(v);
+    }
   }
 
   // private printGraph() {
