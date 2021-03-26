@@ -9,7 +9,7 @@ export class AppComponent {
 
 
   get test() {
-    console.log('render')
+    // console.log('render')
     return;
   }
 }

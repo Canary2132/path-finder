@@ -1,63 +1,72 @@
 import {SquareState} from '../main-content/maze-board/maze-square/maze-square.component';
 
 export class GraphCreator {
-  private static graph = new Map();
+  private static graph;
 
   static fromBoard(board: any[][]): Map<any, any> {
-    // only for printGraph
-    // board.forEach((row, rowIndex) => {
-    //   row.forEach((el, i) => {
-    //     el.row = rowIndex;
-    //     el.col = i;
-    //   });
-    // });
+    this.graph = new Map();
 
-    board.flat().forEach(this.addVertex.bind(this));
+    const start = board.flat().find(v => v.state === SquareState.start);
+    this.addVertices(start, board);
 
-    for (let row = 0; row < board.length; row++) {
-      // loop thought board in chess order to ignore double handling same squares
-      for (let cell = Math.round(row % 2); cell < board[row].length - (1 - Math.round(row % 2)); cell += 2) {
-        if (row) {
-          this.addEdge(board[row][cell], board[row - 1][cell]);
-        }
-        if (row + 1 < board.length) {
-          this.addEdge(board[row][cell], board[row + 1][cell]);
-        }
-        if (cell) {
-          this.addEdge(board[row][cell], board[row][cell - 1]);
-        }
-        if (cell + 1 < board[row].length) {
-          this.addEdge(board[row][cell], board[row][cell + 1]);
-        }
-      }
-    }
+    // this.printGraph();
+
     return this.graph;
   }
 
-  private static addVertex(v): void {
-    this.graph.set(v, new Set());
+  private static addVertices(vertex, board): void {
+    if (!this.graph.has(vertex)) {
+      this.graph.set(vertex, new Set());
+      this.getVertexNeighbors(vertex.id, board).forEach(el => {
+        if (el.state !== SquareState.wall) {
+          this.addVertices(el, board);
+          this.addEdge(vertex, el);
+        }
+      });
+    }
   }
 
-  private static addEdge(v,w): void {
+  private static addEdge(v, w): void {
     if (v.state !== SquareState.wall && w.state !== SquareState.wall){
       this.graph.get(v).add(w);
       this.graph.get(w).add(v);
     }
   }
 
-  // private printGraph() {
-  //   let keys = this.graph.keys();
-  //
-  //   for (let i of keys) {
-  //     let values = this.graph.get(i);
-  //     let conc = '';
-  //
-  //     for (let j of values) {
-  //       conc += `${j.row}-${j.col}` + ' ';
-  //     }
-  //
-  //     console.dir(`${i.row}-${i.col}  -> ` + conc);
-  //   }
-  // }
+
+  private static getVertexNeighbors(vertexId, board) {
+    const res = [];
+    const row = +vertexId.split('-')[0];
+    const col = +vertexId.split('-')[1];
+
+    if (board[row - 1] && board[row - 1][col]) {
+      res.push(board[row - 1][col]);
+    }
+    if (board[row + 1] && board[row + 1][col]) {
+      res.push(board[row + 1][col]);
+    }
+    if (board[row][col - 1]) {
+      res.push(board[row][col - 1]);
+    }
+    if (board[row][col + 1]) {
+      res.push(board[row][col + 1]);
+    }
+    return res;
+  }
+
+  private static printGraph() {
+    let keys = this.graph.keys();
+
+    for (let i of keys) {
+      let values = this.graph.get(i);
+      let conc = '';
+
+      for (let j of values) {
+        conc += `${j.id}` + ' ';
+      }
+
+      console.dir(`${i.id}  -> ` + conc);
+    }
+  }
 
 }

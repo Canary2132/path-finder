@@ -21,7 +21,8 @@ export enum SquareState {
   passed = 'passed',
   wall = 'wall',
   empty = 'empty',
-  optimalPath = 'optimalPath'
+  optimalPath = 'optimalPath',
+  inProcess = 'inProcess'
 }
 
 
@@ -36,7 +37,7 @@ export enum SquareState {
         background: '#61d6ff',
         transform: 'scale(1.0)'
       })),
-      transition('empty => passed', [
+      transition('* => passed', [
         animate('1.2s', keyframes([
           style({
             background: '#bf72ff',
@@ -129,6 +130,9 @@ export enum SquareState {
           })
         ]))
       ]),
+      state('inProcess', style({
+        background: '#28ff21',
+      })),
     ])
   ]
 })

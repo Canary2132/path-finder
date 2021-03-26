@@ -28,6 +28,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   @ViewChild('board', {static: true}) board: ElementRef;
   @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
   boardSquares: {
+    id: string,
     state: string}[][];
 
   private rowsAmount = 30;
@@ -44,7 +45,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < this.rowsAmount; i++) {
       this.boardSquares[i] = [];
       for (let j = 0; j < this.cellsAmount; j++) {
-        this.boardSquares[i][j] = {state: SquareState.empty};
+        this.boardSquares[i][j] = {id: `${i}-${j}`, state: SquareState.empty};
       }
     }
     this.addMouseEvents();
@@ -53,7 +54,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   private setDefaultPath(): void {
     this.boardSquares[10][10].state = SquareState.start;
-    this.boardSquares[10][13].state = SquareState.finish;
+    this.boardSquares[10][30].state = SquareState.finish;
   }
 
   ngAfterViewInit(): void {
@@ -70,6 +71,8 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   async dijkstraAlgorithm() {
+    this.clearBoard();
+
     let unvisitedVertices = [];
     let distances = new Map();
     let previous = new Map();
@@ -85,12 +88,15 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     while (unvisitedVertices.length) {
       const cur = this.getClosestVertex(unvisitedVertices, distances);
 
-      cur.state = cur.state === SquareState.empty ? SquareState.passed : cur.state;
-      this.cd.detectChanges();
+      cur.state = cur.state === SquareState.empty ? SquareState.inProcess : cur.state;
       await delayTimer(ANIMATION_DELAY);
+      this.cd.detectChanges();
 
       unvisitedVertices = unvisitedVertices.filter(el => el !== cur);
 
+      cur.state = cur.state !== SquareState.finish &&  cur.state !== SquareState.start ? SquareState.passed : cur.state;
+      this.cd.detectChanges();
+      await delayTimer(ANIMATION_DELAY); // todo remove delay add fun NodesToPaint, put all drawing stuff there
       if (cur.state === SquareState.finish) {
         let path = cur;
         while (path) {
@@ -109,6 +115,22 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
           previous.set(el, cur);
         }
       });
+
+      console.log('while')
+    }
+
+    console.log('end while')
+    alert('finish node can`t be reached');
+  }
+
+  clearBoard() {
+    for (let i = 0; i < this.rowsAmount; i++) {
+      for (let j = 0; j < this.cellsAmount; j++) {
+        this.boardSquares[i][j].state =
+          this.boardSquares[i][j].state === SquareState.passed || this.boardSquares[i][j].state === SquareState.optimalPath
+            ? SquareState.empty
+            : this.boardSquares[i][j].state;
+      }
     }
   }
 
@@ -118,6 +140,14 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
       if (distances.get(b) === null) return -1;
       return distances.get(a) - distances.get(b);
     })[0];
+  }
+
+  private getVertexNeighbors(vertex) {
+    let nextRow = vertex.row < this.rowsAmount - 1 ? [this.boardSquares[vertex.row + 1][vertex.col]] : [];
+    let prevRow = vertex.row > 0 ? [this.boardSquares[vertex.row - 1][vertex.col]] : [];
+    let nextCol = vertex.col < this.cellsAmount - 1 ? [this.boardSquares[vertex.row][vertex.col + 1]] : [];
+    let prevCol = vertex.col > 0 ? [this.boardSquares[vertex.row][vertex.col - 1]] : [];
+    return nextRow.concat(...nextCol, ...prevCol, ...prevRow);
   }
 
 }
