@@ -23,4 +23,8 @@ export class MouseEventService {
   get mouseState(): MouseState {
     return this._mouseState;
   }
+
+  get isDraggingPathMarker(): boolean {
+    return this._mouseState === MouseState.dragFinishBadge || this._mouseState === MouseState.dragStartBadge;
+  }
 }

@@ -1,9 +1,10 @@
-import {SquareState} from '../main-content/maze-board/maze-square/maze-square.component';
+import {SquareState} from './enums/square-state.enum';
+import {Square} from './interfaces/square';
 
 export class GraphCreator {
   private static graph;
 
-  static fromBoard(board: any[][]): Map<any, any> {
+  static fromBoard(board: Square[][]): Map<Square, Square[]> {
     this.graph = new Map();
 
     const start = board.flat().find(v => v.state === SquareState.start);
@@ -14,9 +15,10 @@ export class GraphCreator {
     return this.graph;
   }
 
-  private static addVertices(vertex, board): void {
+  private static addVertices(vertex: Square, board: Square[][]): void {
     if (!this.graph.has(vertex)) {
       this.graph.set(vertex, new Set());
+
       this.getVertexNeighbors(vertex.id, board).forEach(el => {
         if (el.state !== SquareState.wall) {
           this.addVertices(el, board);
@@ -26,7 +28,7 @@ export class GraphCreator {
     }
   }
 
-  private static addEdge(v, w): void {
+  private static addEdge(v: Square, w: Square): void {
     if (v.state !== SquareState.wall && w.state !== SquareState.wall){
       this.graph.get(v).add(w);
       this.graph.get(w).add(v);
@@ -34,7 +36,7 @@ export class GraphCreator {
   }
 
 
-  private static getVertexNeighbors(vertexId, board) {
+  private static getVertexNeighbors(vertexId: string, board: Square[][]): Square[] {
     const res = [];
     const row = +vertexId.split('-')[0];
     const col = +vertexId.split('-')[1];
@@ -54,19 +56,19 @@ export class GraphCreator {
     return res;
   }
 
-  private static printGraph() {
-    let keys = this.graph.keys();
-
-    for (let i of keys) {
-      let values = this.graph.get(i);
-      let conc = '';
-
-      for (let j of values) {
-        conc += `${j.id}` + ' ';
-      }
-
-      console.dir(`${i.id}  -> ` + conc);
-    }
-  }
+  // private static printGraph() {
+  //   let keys = this.graph.keys();
+  //
+  //   for (let i of keys) {
+  //     let values = this.graph.get(i);
+  //     let conc = '';
+  //
+  //     for (let j of values) {
+  //       conc += `${j.id} `;
+  //     }
+  //
+  //     console.log(`${i.id}  ->  ${conc}`);
+  //   }
+  // }
 
 }

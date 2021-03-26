@@ -11,9 +11,11 @@ import {
 } from '@angular/core';
 import {fromEvent} from 'rxjs';
 import {MouseEventService, MouseState} from './mouse-event.service';
-import {MazeSquareComponent, SquareState} from './maze-square/maze-square.component';
+import {MazeSquareComponent} from './maze-square/maze-square.component';
 import {GraphCreator} from '../../shared/graph-creator';
 import {delayTimer} from '../../shared/helper';
+import {SquareState} from '../../shared/enums/square-state.enum';
+import {Square} from '../../shared/interfaces/square';
 
 const ANIMATION_DELAY = 10;
 
@@ -27,14 +29,12 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('board', {static: true}) board: ElementRef;
   @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
-  boardSquares: {
-    id: string,
-    state: string}[][];
+  boardSquares: Square[][];
 
   private rowsAmount = 30;
   private cellsAmount = 50;
 
-  private graph: Map<any, any>;
+  private graph: Map<Square, Square[]>;
 
   constructor(private mouseEvent: MouseEventService, private cd: ChangeDetectorRef) { }
 
@@ -71,7 +71,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   async dijkstraAlgorithm() {
-    this.clearBoard();
+    this.clearPath();
 
     let unvisitedVertices = [];
     let distances = new Map();
@@ -115,39 +115,29 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
           previous.set(el, cur);
         }
       });
-
-      console.log('while')
     }
 
-    console.log('end while')
     alert('finish node can`t be reached');
   }
 
-  clearBoard() {
-    for (let i = 0; i < this.rowsAmount; i++) {
-      for (let j = 0; j < this.cellsAmount; j++) {
-        this.boardSquares[i][j].state =
-          this.boardSquares[i][j].state === SquareState.passed || this.boardSquares[i][j].state === SquareState.optimalPath
-            ? SquareState.empty
-            : this.boardSquares[i][j].state;
-      }
-    }
+  clearPath(): void {
+    this.boardSquares.forEach(row => {
+      row.forEach(cell => {
+        cell.state = this.squareIsDirty(cell) ? SquareState.empty : cell.state;
+      });
+    });
   }
 
-  private getClosestVertex(vertices, distances) {
+  private squareIsDirty(square: Square): boolean {
+    return square.state === SquareState.passed || square.state === SquareState.optimalPath;
+  }
+
+  private getClosestVertex(vertices, distances): Square {
     return vertices.sort((a, b) => {
       if (distances.get(a) === null) return 1;
       if (distances.get(b) === null) return -1;
       return distances.get(a) - distances.get(b);
     })[0];
-  }
-
-  private getVertexNeighbors(vertex) {
-    let nextRow = vertex.row < this.rowsAmount - 1 ? [this.boardSquares[vertex.row + 1][vertex.col]] : [];
-    let prevRow = vertex.row > 0 ? [this.boardSquares[vertex.row - 1][vertex.col]] : [];
-    let nextCol = vertex.col < this.cellsAmount - 1 ? [this.boardSquares[vertex.row][vertex.col + 1]] : [];
-    let prevCol = vertex.col > 0 ? [this.boardSquares[vertex.row][vertex.col - 1]] : [];
-    return nextRow.concat(...nextCol, ...prevCol, ...prevRow);
   }
 
 }
