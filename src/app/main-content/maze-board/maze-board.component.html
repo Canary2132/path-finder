@@ -1,7 +1,7 @@
-<button (click)="dijkstraAlgorithm()">Find path</button>
+<button (click)="runDijkstra()">Find path</button>
 <button (click)="clearPath()">Clear path</button>
 
-<div class="board" #board>
+<div class="board" #board [class.blocked]="isPainting">
   <div class="row" *ngFor="let row of boardSquares">
     <ng-container *ngFor="let square of row">
       <div class="cell">

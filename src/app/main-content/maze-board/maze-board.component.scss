@@ -12,33 +12,10 @@ $border: 1px solid #3b3e70;
     .cell{
       border-bottom: $border;
       border-right: $border;
-
-      //&.start{
-      //  background: #00ff1d;
-      //  position: relative;
-      //
-      //  &:before{
-      //    content: '➤';
-      //    position: absolute;
-      //    top: 50%;
-      //    left: 50%;
-      //    transform: translate(-50%, -50%);
-      //    font-size: 20px;
-      //  }
-      //}
-      //&.finish{
-      //  background: #cd3208;
-      //  position: relative;
-      //
-      //  &:before{
-      //    content: '🞅';
-      //    position: absolute;
-      //    top: 50%;
-      //    left: 50%;
-      //    transform: translate(-50%, -50%);
-      //    font-size: 20px;
-      //  }
-      //}
     }
+  }
+
+  &.blocked{
+    pointer-events: none;
   }
 }

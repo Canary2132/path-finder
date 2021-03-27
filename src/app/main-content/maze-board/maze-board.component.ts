@@ -9,15 +9,17 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {fromEvent} from 'rxjs';
+import {concat, from, fromEvent, of, Subscription} from 'rxjs';
 import {MouseEventService, MouseState} from './mouse-event.service';
 import {MazeSquareComponent} from './maze-square/maze-square.component';
 import {GraphCreator} from '../../shared/graph-creator';
 import {delayTimer} from '../../shared/helper';
-import {SquareState} from '../../shared/enums/square-state.enum';
-import {Square} from '../../shared/interfaces/square';
+import {VertexState} from '../../shared/enums/vertex-state.enum';
+import {Vertex} from '../../shared/interfaces/vertex';
+import {concatMap, delay, last, takeLast} from 'rxjs/operators';
+import {DijkstraAlgorithm} from '../algorithms/dijkstra';
 
-const ANIMATION_DELAY = 10;
+const ANIMATION_DELAY = 50;
 
 @Component({
   selector: 'app-maze-board',
@@ -29,115 +31,101 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('board', {static: true}) board: ElementRef;
   @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
-  boardSquares: Square[][];
+  boardSquares: Vertex[][];
 
   private rowsAmount = 30;
   private cellsAmount = 50;
 
-  private graph: Map<Square, Square[]>;
+  private graph: Map<Vertex, Vertex[]>;
+
+  private paintQueue$;
+  private paintQueue = [];
+
+  isPainting = false;
+  private algorithmEvents$;
 
   constructor(private mouseEvent: MouseEventService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    this.createBoard();
+    this.addMouseEvents();
+    this.setDefaultPath();
+  }
 
+  private createBoard(){
     // use loop to gain better performance than fill and map
     this.boardSquares = new Array(this.rowsAmount);
     for (let i = 0; i < this.rowsAmount; i++) {
       this.boardSquares[i] = [];
       for (let j = 0; j < this.cellsAmount; j++) {
-        this.boardSquares[i][j] = {id: `${i}-${j}`, state: SquareState.empty};
+        this.boardSquares[i][j] = {id: `${i}-${j}`, state: VertexState.empty};
       }
     }
-    this.addMouseEvents();
-    this.setDefaultPath();
   }
 
   private setDefaultPath(): void {
-    this.boardSquares[10][10].state = SquareState.start;
-    this.boardSquares[10][30].state = SquareState.finish;
+    this.boardSquares[10][10].state = VertexState.start;
+    this.boardSquares[10][30].state = VertexState.finish;
   }
 
   ngAfterViewInit(): void {
     // console.log(this.comp.toArray());
   }
 
-  addMouseEvents(): void {
-    const up$ = fromEvent(document, 'mouseup');
-
-    up$.subscribe((e: MouseEvent) => {
+  private addMouseEvents(): void {
+    fromEvent(document, 'mouseup').subscribe((e: MouseEvent) => {
       e.preventDefault();
       this.mouseEvent.mouseState = MouseState.btnReleased;
     });
   }
 
-  async dijkstraAlgorithm() {
+  runDijkstra(): void {
     this.clearPath();
-
-    let unvisitedVertices = [];
-    let distances = new Map();
-    let previous = new Map();
-
     this.graph = GraphCreator.fromBoard(this.boardSquares);
+    this.algorithmEvents$?.unsubscribe();
+    this.algorithmEvents$ = DijkstraAlgorithm.event.subscribe(data => this.addToPaintQueue(data));
+    DijkstraAlgorithm.run(this.graph);
+  }
 
-    Array.from(this.graph.keys()).forEach((el, i) => {
-      distances.set(el, el.state === SquareState.start ? 0 : null);
-      previous.set(el, null);
-      unvisitedVertices.push(el);
-    });
+  private addToPaintQueue(data: {vertex: Vertex, newState: VertexState}): void {
+    this.paintQueue.push(data);
+    this.isPainting = true;
 
-    while (unvisitedVertices.length) {
-      const cur = this.getClosestVertex(unvisitedVertices, distances);
+    const queueEvent = from(this.paintQueue)
+      .pipe(concatMap( item => of(item).pipe(delay(0)) ));
 
-      cur.state = cur.state === SquareState.empty ? SquareState.inProcess : cur.state;
-      await delayTimer(ANIMATION_DELAY);
-      this.cd.detectChanges();
+    this.paintQueue$?.unsubscribe();
+    this.paintQueue$ = queueEvent.subscribe( () => this.paintVertex());
+  }
 
-      unvisitedVertices = unvisitedVertices.filter(el => el !== cur);
+  private paintVertex(): void {
+    let updateData = this.paintQueue.shift();
+    updateData.vertex.state = updateData.newState;
 
-      cur.state = cur.state !== SquareState.finish &&  cur.state !== SquareState.start ? SquareState.passed : cur.state;
-      this.cd.detectChanges();
-      await delayTimer(ANIMATION_DELAY); // todo remove delay add fun NodesToPaint, put all drawing stuff there
-      if (cur.state === SquareState.finish) {
-        let path = cur;
-        while (path) {
-          const a = path;
-          a.state = a.state === SquareState.passed ? SquareState.optimalPath : a.state;
-          this.cd.detectChanges();
-          await delayTimer(ANIMATION_DELAY);
-          path = previous.get(path);
-        }
-        return;
-      }
+    this.isPainting = !!this.paintQueue.length;
+    this.cd.detectChanges();
+  }
 
-      this.graph.get(cur).forEach(el => {
-        if (!distances.get(el) && unvisitedVertices.find(exist => exist === el)) {
-          distances.set(el, 1);
-          previous.set(el, cur);
-        }
-      });
-    }
-
-    alert('finish node can`t be reached');
+  private stopPainting(): void {
+    this.paintQueue$.unsubscribe();
+    this.paintQueue = [];
+    this.isPainting = false;
   }
 
   clearPath(): void {
+    if (this.isPainting) {
+      this.stopPainting();
+    }
+
     this.boardSquares.forEach(row => {
       row.forEach(cell => {
-        cell.state = this.squareIsDirty(cell) ? SquareState.empty : cell.state;
+        cell.state = this.squareIsDirty(cell) ? VertexState.empty : cell.state;
       });
     });
   }
 
-  private squareIsDirty(square: Square): boolean {
-    return square.state === SquareState.passed || square.state === SquareState.optimalPath;
-  }
-
-  private getClosestVertex(vertices, distances): Square {
-    return vertices.sort((a, b) => {
-      if (distances.get(a) === null) return 1;
-      if (distances.get(b) === null) return -1;
-      return distances.get(a) - distances.get(b);
-    })[0];
+  private squareIsDirty(square: Vertex): boolean {
+    return square.state === VertexState.passed || square.state === VertexState.optimalPath || square.state === VertexState.inProcess;
   }
 
 }

@@ -1,4 +1,4 @@
-export enum SquareState {
+export enum VertexState {
   start = 'start',
   finish = 'finish',
   passed = 'passed',

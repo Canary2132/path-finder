@@ -15,7 +15,7 @@ import {MouseEventService, MouseState} from '../mouse-event.service';
 import {fromEvent} from 'rxjs';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SquareAnimation} from './square-animations';
-import {SquareState} from '../../../shared/enums/square-state.enum';
+import {VertexState} from '../../../shared/enums/vertex-state.enum';
 
 
 @Component({
@@ -27,8 +27,8 @@ import {SquareState} from '../../../shared/enums/square-state.enum';
 })
 export class MazeSquareComponent implements OnInit {
 
-  @Input() state: SquareState;
-  @Output() stateChange: EventEmitter<SquareState> = new EventEmitter<SquareState>();
+  @Input() state: VertexState;
+  @Output() stateChange: EventEmitter<VertexState> = new EventEmitter<VertexState>();
 
   constructor(private mouseEvent: MouseEventService,
               private zone: NgZone,
@@ -55,9 +55,9 @@ export class MazeSquareComponent implements OnInit {
     if (this.mouseEvent.mouseState === MouseState.btnPressed && !this.isPathMarker) {
       this.changePermeability();
     } else if (this.mouseEvent.mouseState === MouseState.dragStartBadge) {
-      this.state = SquareState.start;
+      this.state = VertexState.start;
     } else if (this.mouseEvent.mouseState === MouseState.dragFinishBadge) {
-      this.state = SquareState.finish;
+      this.state = VertexState.finish;
     }
     this.update();
   }
@@ -65,16 +65,16 @@ export class MazeSquareComponent implements OnInit {
   private onMouseLeave(e: MouseEvent): void {
     e.preventDefault();
     if (this.mouseEvent.isDraggingPathMarker && this.isPathMarker) {
-      this.state = SquareState.empty;
+      this.state = VertexState.empty;
       this.update();
     }
   }
 
   private onMouseDown(e: MouseEvent): void {
     e.preventDefault();
-    if (this.state === SquareState.start) {
+    if (this.state === VertexState.start) {
       this.mouseEvent.mouseState = MouseState.dragStartBadge;
-    } else if (this.state === SquareState.finish) {
+    } else if (this.state === VertexState.finish) {
       this.mouseEvent.mouseState = MouseState.dragFinishBadge;
     } else {
       this.mouseEvent.mouseState = MouseState.btnPressed;
@@ -89,11 +89,11 @@ export class MazeSquareComponent implements OnInit {
   }
 
   private changePermeability(): void{
-    this.state = this.state === SquareState.wall ? SquareState.empty : SquareState.wall;
+    this.state = this.state === VertexState.wall ? VertexState.empty : VertexState.wall;
   }
 
   private get isPathMarker(): boolean {
-    return this.state === SquareState.start || this.state === SquareState.finish;
+    return this.state === VertexState.start || this.state === VertexState.finish;
   }
 
 }

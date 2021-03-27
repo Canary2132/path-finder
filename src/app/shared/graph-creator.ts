@@ -1,13 +1,13 @@
-import {SquareState} from './enums/square-state.enum';
-import {Square} from './interfaces/square';
+import {VertexState} from './enums/vertex-state.enum';
+import {Vertex} from './interfaces/vertex';
 
 export class GraphCreator {
   private static graph;
 
-  static fromBoard(board: Square[][]): Map<Square, Square[]> {
+  static fromBoard(board: Vertex[][]): Map<Vertex, Vertex[]> {
     this.graph = new Map();
 
-    const start = board.flat().find(v => v.state === SquareState.start);
+    const start = board.flat().find(vertex => vertex.state === VertexState.start);
     this.addVertices(start, board);
 
     // this.printGraph();
@@ -15,28 +15,25 @@ export class GraphCreator {
     return this.graph;
   }
 
-  private static addVertices(vertex: Square, board: Square[][]): void {
+  private static addVertices(vertex: Vertex, board: Vertex[][]): void {
     if (!this.graph.has(vertex)) {
       this.graph.set(vertex, new Set());
 
-      this.getVertexNeighbors(vertex.id, board).forEach(el => {
-        if (el.state !== SquareState.wall) {
-          this.addVertices(el, board);
-          this.addEdge(vertex, el);
+      this.getVertexNeighbors(vertex.id, board).forEach(neighborVertex => {
+        if (neighborVertex.state !== VertexState.wall) {
+          this.addVertices(neighborVertex, board);
+          this.addEdge(vertex, neighborVertex);
         }
       });
     }
   }
 
-  private static addEdge(v: Square, w: Square): void {
-    if (v.state !== SquareState.wall && w.state !== SquareState.wall){
-      this.graph.get(v).add(w);
-      this.graph.get(w).add(v);
-    }
+  private static addEdge(firstVertex: Vertex, secondVertex: Vertex): void {
+    this.graph.get(firstVertex).add(secondVertex);
+    this.graph.get(secondVertex).add(firstVertex);
   }
 
-
-  private static getVertexNeighbors(vertexId: string, board: Square[][]): Square[] {
+  private static getVertexNeighbors(vertexId: string, board: Vertex[][]): Vertex[] {
     const res = [];
     const row = +vertexId.split('-')[0];
     const col = +vertexId.split('-')[1];
