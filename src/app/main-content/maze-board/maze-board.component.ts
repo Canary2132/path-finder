@@ -16,8 +16,9 @@ import {GraphCreator} from '../../shared/graph-creator';
 import {delayTimer} from '../../shared/helper';
 import {VertexState} from '../../shared/enums/vertex-state.enum';
 import {Vertex} from '../../shared/interfaces/vertex';
-import {concatMap, delay, last, takeLast} from 'rxjs/operators';
+import {concatMap, delay, filter, last, takeLast} from 'rxjs/operators';
 import {DijkstraAlgorithm} from '../algorithms/dijkstra';
+import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 
 const ANIMATION_DELAY = 50;
 
@@ -31,6 +32,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('board', {static: true}) board: ElementRef;
   @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
+
   boardSquares: Vertex[][];
 
   private rowsAmount = 30;
@@ -42,6 +44,8 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private paintQueue = [];
 
   isPainting = false;
+  boardStatus: string;
+
   private algorithmEvents$;
 
   constructor(private mouseEvent: MouseEventService, private cd: ChangeDetectorRef) { }
@@ -80,11 +84,22 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   runDijkstra(): void {
-    this.clearPath();
+    this.clearBoard();
     this.graph = GraphCreator.fromBoard(this.boardSquares);
-    this.algorithmEvents$?.unsubscribe();
-    this.algorithmEvents$ = DijkstraAlgorithm.event.subscribe(data => this.addToPaintQueue(data));
+    this.handleAlgorithmEvents();
     DijkstraAlgorithm.run(this.graph);
+  }
+
+  private handleAlgorithmEvents(): void {
+    this.algorithmEvents$?.unsubscribe();
+    this.algorithmEvents$ = DijkstraAlgorithm.event
+      .subscribe((e) => {
+        if (e.type === 'updateVertex') {
+          this.addToPaintQueue(e.data);
+        } else if (e.type === 'complete' && !e.isFinishFound) {
+          this.boardStatus = 'Finish could not be reached';
+        }
+      });
   }
 
   private addToPaintQueue(data: {vertex: Vertex, newState: VertexState}): void {
@@ -112,7 +127,8 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.isPainting = false;
   }
 
-  clearPath(): void {
+  clearBoard(): void {
+    this.boardStatus = '';
     if (this.isPainting) {
       this.stopPainting();
     }

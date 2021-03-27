@@ -1,23 +1,27 @@
 import {VertexState} from '../../shared/enums/vertex-state.enum';
 import {Vertex} from '../../shared/interfaces/vertex';
 import {EventEmitter} from '@angular/core';
+import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 
 export class DijkstraAlgorithm {
-  static event: EventEmitter<any> = new EventEmitter<any>();
+  static event: EventEmitter<UpdateVertexEvent | CompletedEvent> = new EventEmitter<any>();
 
   private static previousVertex: Map<Vertex, Vertex>;
   private static distanceFromStart: Map<Vertex, number>;
   private static unvisitedVertices: Vertex[];
   private static graph: Map<Vertex, Vertex[]>;
 
+  private static isFinishFound = false;
+
   static run(graph: Map<Vertex, Vertex[]>): void {
+    this.isFinishFound = false;
     this.setInitialData(graph);
 
-    while (this.unvisitedVertices.length) {
+    while (!this.isFinishFound && this.unvisitedVertices.length) {
       this.processDijkstraStep();
     }
 
-    // alert('finish node can`t be reached');
+    this.event.emit({type: 'complete', isFinishFound: this.isFinishFound});
   }
 
   private static processDijkstraStep(): void {
@@ -26,7 +30,7 @@ export class DijkstraAlgorithm {
 
     if (currentVertex.state === VertexState.finish) {
       this.markOptimalPath(currentVertex);
-      this.unvisitedVertices = []; // end Dijkstra alg loop
+      this.isFinishFound = true;
       return;
     }
 
@@ -76,7 +80,7 @@ export class DijkstraAlgorithm {
     const vertexIsPathMarker = vertex.state === VertexState.finish || vertex.state === VertexState.start;
     const newState = vertexIsPathMarker ? vertex.state : state;
 
-    this.event.emit({vertex, newState});
+    this.event.emit({type: 'updateVertex', data: {vertex, newState}});
   }
 
   private static getClosestVertex(): Vertex {

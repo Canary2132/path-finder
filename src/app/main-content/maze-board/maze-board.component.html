@@ -1,5 +1,7 @@
 <button (click)="runDijkstra()">Find path</button>
-<button (click)="clearPath()">Clear path</button>
+<button (click)="clearBoard()">Clear path</button>
+
+<div class="board-status">{{boardStatus}}</div>
 
 <div class="board" #board [class.blocked]="isPainting">
   <div class="row" *ngFor="let row of boardSquares">
