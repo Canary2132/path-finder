@@ -1,6 +1,7 @@
 import {VertexState} from '../enums/vertex-state.enum';
 
 export interface Vertex {
-  id: string;
+  boardRow: number;
+  boardCol: number;
   state: VertexState;
 }

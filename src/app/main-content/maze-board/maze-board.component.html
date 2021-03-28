@@ -3,11 +3,11 @@
 
 <div class="board-status">{{boardStatus}}</div>
 
-<div class="board" #board [class.blocked]="isPainting">
-  <div class="row" *ngFor="let row of boardSquares">
-    <ng-container *ngFor="let square of row">
+<div class="board" [class.blocked]="isPainting">
+  <div class="row" *ngFor="let row of boardSquaresCounter(rowsAmount)">
+    <ng-container *ngFor="let square of boardSquaresCounter(colsAmount)">
       <div class="cell">
-        <app-maze-square #cmp [(state)]="square.state"></app-maze-square>
+        <app-maze-square #vertices></app-maze-square>
       </div>
     </ng-container>
   </div>

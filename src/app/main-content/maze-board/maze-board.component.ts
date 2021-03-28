@@ -3,14 +3,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
+  ElementRef, NgZone,
   OnInit,
   QueryList,
   ViewChild,
   ViewChildren
 } from '@angular/core';
 import {concat, from, fromEvent, of, Subscription} from 'rxjs';
-import {MouseEventService, MouseState} from './mouse-event.service';
+import {MouseEventService, MouseState} from './services/mouse-event.service';
 import {MazeSquareComponent} from './maze-square/maze-square.component';
 import {GraphCreator} from '../../shared/graph-creator';
 import {delayTimer} from '../../shared/helper';
@@ -19,8 +19,7 @@ import {Vertex} from '../../shared/interfaces/vertex';
 import {concatMap, delay, filter, last, takeLast} from 'rxjs/operators';
 import {DijkstraAlgorithm} from '../algorithms/dijkstra';
 import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
-
-const ANIMATION_DELAY = 50;
+import {PathMarkersService} from './services/path-markers.service';
 
 @Component({
   selector: 'app-maze-board',
@@ -30,15 +29,12 @@ const ANIMATION_DELAY = 50;
 })
 export class MazeBoardComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('board', {static: true}) board: ElementRef;
-  @ViewChildren('cmp') comp: QueryList<MazeSquareComponent>;
+  @ViewChildren('vertices') vertices: QueryList<MazeSquareComponent>;
 
-  boardSquares: Vertex[][];
+  rowsAmount = 30;
+  colsAmount = 50;
 
-  private rowsAmount = 30;
-  private cellsAmount = 50;
-
-  private graph: Map<Vertex, Vertex[]>;
+  private graph: Map<Vertex, Set<Vertex>>;
 
   private paintQueue$;
   private paintQueue = [];
@@ -48,32 +44,33 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   private algorithmEvents$;
 
-  constructor(private mouseEvent: MouseEventService, private cd: ChangeDetectorRef) { }
+  constructor(private mouseEvent: MouseEventService,
+              private cd: ChangeDetectorRef,
+              private pathMarkers: PathMarkersService,
+              private zone: NgZone) { }
 
   ngOnInit(): void {
-    this.createBoard();
     this.addMouseEvents();
-    this.setDefaultPath();
-  }
-
-  private createBoard(){
-    // use loop to gain better performance than fill and map
-    this.boardSquares = new Array(this.rowsAmount);
-    for (let i = 0; i < this.rowsAmount; i++) {
-      this.boardSquares[i] = [];
-      for (let j = 0; j < this.cellsAmount; j++) {
-        this.boardSquares[i][j] = {id: `${i}-${j}`, state: VertexState.empty};
-      }
-    }
-  }
-
-  private setDefaultPath(): void {
-    this.boardSquares[10][10].state = VertexState.start;
-    this.boardSquares[10][30].state = VertexState.finish;
   }
 
   ngAfterViewInit(): void {
-    // console.log(this.comp.toArray());
+    this.setVertexData();
+    this.setDefaultPath();
+  }
+
+  private setVertexData(): void{
+    this.vertices.toArray().forEach((vertex, i) => {
+      vertex.boardRow = Math.floor(i / this.colsAmount);
+      vertex.boardCol = i % this.colsAmount;
+    });
+  }
+
+  private setDefaultPath(): void {
+    const row = Math.floor(this.rowsAmount * 0.45);
+    const starIndex = Math.floor(row * this.colsAmount + this.colsAmount * 0.3);
+    const finishIndex = Math.floor(row * this.colsAmount + this.colsAmount * 0.7);
+    this.pathMarkers.newStart = this.vertices.toArray()[starIndex];
+    this.pathMarkers.newFinish = this.vertices.toArray()[finishIndex];
   }
 
   private addMouseEvents(): void {
@@ -85,7 +82,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   runDijkstra(): void {
     this.clearBoard();
-    this.graph = GraphCreator.fromBoard(this.boardSquares);
+    this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
     this.handleAlgorithmEvents();
     DijkstraAlgorithm.run(this.graph);
   }
@@ -105,12 +102,13 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private addToPaintQueue(data: {vertex: Vertex, newState: VertexState}): void {
     this.paintQueue.push(data);
     this.isPainting = true;
-
     const queueEvent = from(this.paintQueue)
-      .pipe(concatMap( item => of(item).pipe(delay(0)) ));
+      .pipe(concatMap( item => of(item).pipe(delay(10)) ));
 
     this.paintQueue$?.unsubscribe();
-    this.paintQueue$ = queueEvent.subscribe( () => this.paintVertex());
+    this.zone.runOutsideAngular(() => {
+      this.paintQueue$ = queueEvent.subscribe( () => this.paintVertex());
+    });
   }
 
   private paintVertex(): void {
@@ -133,15 +131,11 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
       this.stopPainting();
     }
 
-    this.boardSquares.forEach(row => {
-      row.forEach(cell => {
-        cell.state = this.squareIsDirty(cell) ? VertexState.empty : cell.state;
-      });
-    });
+    this.vertices.forEach(cell => cell.clearDirty());
   }
 
-  private squareIsDirty(square: Vertex): boolean {
-    return square.state === VertexState.passed || square.state === VertexState.optimalPath || square.state === VertexState.inProcess;
+  boardSquaresCounter(number: number): Array<any>{
+    return new Array(number);
   }
 
 }

@@ -2,11 +2,11 @@ import {animate, keyframes, state, style, transition, trigger} from '@angular/an
 
 export const SquareAnimation = [
     trigger('square', [
-    state('passed', style({
+    state('visited', style({
       background: '#61d6ff',
       transform: 'scale(1.0)'
     })),
-    transition('* => passed', [
+    transition('* => visited', [
       animate('1.2s', keyframes([
         style({
           background: '#bf72ff',
@@ -80,7 +80,7 @@ export const SquareAnimation = [
     state('optimalPath', style({
       background: '#ffde21',
     })),
-    transition('passed => optimalPath', [
+    transition('visited => optimalPath', [
       animate('0.4s', keyframes([
         style({
           background: '#fdf678',

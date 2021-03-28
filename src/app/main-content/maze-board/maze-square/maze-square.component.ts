@@ -1,21 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  forwardRef,
-  Input,
-  NgZone,
-  OnInit,
-  Output
-} from '@angular/core';
-import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
-import {MouseEventService, MouseState} from '../mouse-event.service';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, NgZone, OnInit, Output} from '@angular/core';
+import {MouseEventService, MouseState} from '../services/mouse-event.service';
 import {fromEvent} from 'rxjs';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SquareAnimation} from './square-animations';
 import {VertexState} from '../../../shared/enums/vertex-state.enum';
+import {PathMarkersService} from '../services/path-markers.service';
+import {Vertex} from '../../../shared/interfaces/vertex';
 
 
 @Component({
@@ -25,15 +14,17 @@ import {VertexState} from '../../../shared/enums/vertex-state.enum';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: SquareAnimation
 })
-export class MazeSquareComponent implements OnInit {
+export class MazeSquareComponent implements Vertex, OnInit {
+  private _state: VertexState = VertexState.empty;
 
-  @Input() state: VertexState;
-  @Output() stateChange: EventEmitter<VertexState> = new EventEmitter<VertexState>();
+  boardRow: number;
+  boardCol: number;
 
   constructor(private mouseEvent: MouseEventService,
               private zone: NgZone,
               private thisElement: ElementRef,
-              private cd: ChangeDetectorRef) { }
+              public cd: ChangeDetectorRef,
+              private pathMarkers: PathMarkersService) { }
 
   ngOnInit(): void {
     this.addListeners();
@@ -43,8 +34,7 @@ export class MazeSquareComponent implements OnInit {
     this.zone.runOutsideAngular(() => {
       fromEvent(this.thisElement.nativeElement, 'mouseenter')
         .subscribe((e: MouseEvent) => this.onMouseEnter(e));
-      fromEvent(this.thisElement.nativeElement, 'mouseleave')
-        .subscribe((e: MouseEvent) => this.onMouseLeave(e));
+
       fromEvent(this.thisElement.nativeElement, 'mousedown')
         .subscribe((e: MouseEvent) => this.onMouseDown(e));
     });
@@ -52,48 +42,54 @@ export class MazeSquareComponent implements OnInit {
 
   private onMouseEnter(e: MouseEvent): void {
     e.preventDefault();
-    if (this.mouseEvent.mouseState === MouseState.btnPressed && !this.isPathMarker) {
-      this.changePermeability();
-    } else if (this.mouseEvent.mouseState === MouseState.dragStartBadge) {
-      this.state = VertexState.start;
-    } else if (this.mouseEvent.mouseState === MouseState.dragFinishBadge) {
-      this.state = VertexState.finish;
-    }
-    this.update();
-  }
+    if (this.isPathMarker) return;
 
-  private onMouseLeave(e: MouseEvent): void {
-    e.preventDefault();
-    if (this.mouseEvent.isDraggingPathMarker && this.isPathMarker) {
-      this.state = VertexState.empty;
-      this.update();
+    if (this.mouseEvent.mouseState === MouseState.btnPressed) {
+      this.changePermeability();
+      this.cd.detectChanges();
+    } else if (this.mouseEvent.mouseState === MouseState.dragStartBadge) {
+      this.pathMarkers.newStart = this;
+      this.cd.detectChanges();
+    } else if (this.mouseEvent.mouseState === MouseState.dragFinishBadge) {
+      this.pathMarkers.newFinish = this;
+      this.cd.detectChanges();
     }
   }
 
   private onMouseDown(e: MouseEvent): void {
     e.preventDefault();
-    if (this.state === VertexState.start) {
+    if (this._state === VertexState.start) {
       this.mouseEvent.mouseState = MouseState.dragStartBadge;
-    } else if (this.state === VertexState.finish) {
+    } else if (this._state === VertexState.finish) {
       this.mouseEvent.mouseState = MouseState.dragFinishBadge;
     } else {
       this.mouseEvent.mouseState = MouseState.btnPressed;
       this.changePermeability();
-      this.update();
     }
   }
 
-  private update(): void {
-    this.stateChange.emit(this.state);
+  clearDirty(): void {
+    if (this._state === VertexState.visited || this._state === VertexState.optimalPath || this._state === VertexState.inProcess) {
+      this.state = VertexState.empty;
+    }
+  }
+
+  get state(): VertexState {
+    return this._state;
+  }
+
+  set state(value: VertexState) {
+    this._state = value;
     this.cd.detectChanges();
   }
 
   private changePermeability(): void{
-    this.state = this.state === VertexState.wall ? VertexState.empty : VertexState.wall;
+    this._state = this._state === VertexState.wall ? VertexState.empty : VertexState.wall;
+    this.cd.detectChanges();
   }
 
   private get isPathMarker(): boolean {
-    return this.state === VertexState.start || this.state === VertexState.finish;
+    return this._state === VertexState.start || this._state === VertexState.finish;
   }
 
 }

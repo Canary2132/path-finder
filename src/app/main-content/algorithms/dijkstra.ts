@@ -9,11 +9,11 @@ export class DijkstraAlgorithm {
   private static previousVertex: Map<Vertex, Vertex>;
   private static distanceFromStart: Map<Vertex, number>;
   private static unvisitedVertices: Vertex[];
-  private static graph: Map<Vertex, Vertex[]>;
+  private static graph: Map<Vertex, Set<Vertex>>;
 
   private static isFinishFound = false;
 
-  static run(graph: Map<Vertex, Vertex[]>): void {
+  static run(graph: Map<Vertex, Set<Vertex>>): void {
     this.isFinishFound = false;
     this.setInitialData(graph);
 
@@ -40,15 +40,15 @@ export class DijkstraAlgorithm {
   private static processVertex(vertex: Vertex): void {
     this.markVertex(vertex, VertexState.inProcess);
     this.unvisitedVertices = this.unvisitedVertices.filter(el => el !== vertex);
-    this.markVertex(vertex, VertexState.passed);
+    this.markVertex(vertex, VertexState.visited);
   }
 
-  private static setInitialData(graph: Map<Vertex, Vertex[]>): void {
+  private static setInitialData(graph: Map<Vertex, Set<Vertex>>): void {
     this.graph = graph;
     const vertices = Array.from(graph.keys());
-    this.unvisitedVertices = [];
     this.distanceFromStart = new Map();
     this.previousVertex = new Map();
+    this.unvisitedVertices = [];
 
     vertices.forEach(vertex => {
       this.distanceFromStart.set(vertex, vertex.state === VertexState.start ? 0 : Infinity);
