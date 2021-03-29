@@ -1,0 +1,6 @@
+<ngb-toast
+  class="toast bg-danger text-light"
+  *ngFor="let toast of toastService.toasts"
+  [header]="toast.header" [autohide]="true" [delay]="toast.delayTime || 5000"
+  (hidden)="toastService.remove(toast)"
+>{{toast.body}}</ngb-toast>

@@ -20,6 +20,7 @@ import {concatMap, delay, filter, last, takeLast} from 'rxjs/operators';
 import {DijkstraAlgorithm} from '../algorithms/dijkstra';
 import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 import {PathMarkersService} from './services/path-markers.service';
+import {ToastService} from '../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-maze-board',
@@ -40,14 +41,14 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private paintQueue = [];
 
   isPainting = false;
-  boardStatus: string;
 
   private algorithmEvents$;
 
   constructor(private mouseEvent: MouseEventService,
               private cd: ChangeDetectorRef,
               private pathMarkers: PathMarkersService,
-              private zone: NgZone) { }
+              private zone: NgZone,
+              private toast: ToastService) { }
 
   ngOnInit(): void {
     this.addMouseEvents();
@@ -94,7 +95,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
         if (e.type === 'updateVertex') {
           this.addToPaintQueue(e.data);
         } else if (e.type === 'complete' && !e.isFinishFound) {
-          this.boardStatus = 'Finish could not be reached';
+          this.toast.show({body: 'Finish could not be reached'});
         }
       });
   }
@@ -126,7 +127,6 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   clearBoard(): void {
-    this.boardStatus = '';
     if (this.isPainting) {
       this.stopPainting();
     }

@@ -1,8 +1,14 @@
 header{
   font-size: 26px;
   color: white;
-  background: #001a62;
+  background: #007bff;
   padding: 10px 20px;
   font-weight: bold;
-  font-family: Arial, serif;
+}
+
+.toast{
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
 }

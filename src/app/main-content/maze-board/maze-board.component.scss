@@ -6,7 +6,7 @@ $border: 1px solid #3b3e70;
   border-top: $border;
   width: min-content;
 
-  .row{
+  .board-row{
     display: flex;
 
     .cell{
