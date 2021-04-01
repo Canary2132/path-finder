@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MazeBoardComponent } from './maze-board.component';
+import {QueryList} from '@angular/core';
+import {MazeSquareComponent} from './maze-square/maze-square.component';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('MazeBoardComponent', () => {
   let component: MazeBoardComponent;
@@ -8,7 +11,8 @@ describe('MazeBoardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MazeBoardComponent ]
+      declarations: [ MazeBoardComponent, MazeSquareComponent ],
+      imports: [BrowserAnimationsModule]
     })
     .compileComponents();
   });
@@ -21,5 +25,9 @@ describe('MazeBoardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should contain array of MazeSquareComponent', () => {
+    // expect(component.vertices).toContain(MazeSquareComponent);
   });
 });

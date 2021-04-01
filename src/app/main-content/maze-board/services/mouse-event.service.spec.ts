@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { MouseEventService } from './mouse-event.service';
+import {MouseEventService, MouseState} from './mouse-event.service';
 
 describe('MouseEventService', () => {
   let service: MouseEventService;
@@ -12,5 +12,17 @@ describe('MouseEventService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('should save mouse state', () => {
+    service.mouseState = MouseState.btnPressed;
+    expect(service.mouseState).toBe(MouseState.btnPressed);
+  });
+
+  it('should inform if path marker is dragging ', () => {
+    service.mouseState = MouseState.dragFinishBadge;
+    expect(service.isDraggingPathMarker).toBeTrue();
+    service.mouseState = MouseState.btnReleased;
+    expect(service.isDraggingPathMarker).toBeFalse();
   });
 });

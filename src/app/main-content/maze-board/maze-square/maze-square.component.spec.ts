@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MazeSquareComponent } from './maze-square.component';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('MazeSquareComponent', () => {
   let component: MazeSquareComponent;
@@ -8,7 +9,8 @@ describe('MazeSquareComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MazeSquareComponent ]
+      declarations: [ MazeSquareComponent ],
+      imports: [ BrowserAnimationsModule ],
     })
     .compileComponents();
   });
