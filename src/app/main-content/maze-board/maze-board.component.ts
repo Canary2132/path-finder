@@ -82,7 +82,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   runDijkstra(): void {
-    this.clearBoard();
+    this.clearPath();
     this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
     this.handleAlgorithmEvents();
     DijkstraAlgorithm.run(this.graph);
@@ -126,12 +126,20 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.isPainting = false;
   }
 
-  clearBoard(): void {
+  clearPath(): void {
     if (this.isPainting) {
       this.stopPainting();
     }
 
     this.vertices.forEach(cell => cell.clearDirty());
+  }
+
+  clearAll(): void {
+    if (this.isPainting) {
+      this.stopPainting();
+    }
+
+    this.vertices.forEach(cell => cell.clearNonPathMarkers());
   }
 
   boardSquaresCounter(number: number): Array<any>{

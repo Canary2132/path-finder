@@ -1,6 +1,7 @@
 <div class="controls m-3">
   <button class="btn btn-primary mr-3" (click)="runDijkstra()">Find path</button>
-  <button class="btn btn-danger" (click)="clearBoard()">Clear path</button>
+  <button class="btn btn-danger mr-3" (click)="clearPath()">Clear path</button>
+  <button class="btn btn-danger mr-3" (click)="clearAll()">Clear all</button>
 </div>
 
 <div class="board" [class.blocked]="isPainting">

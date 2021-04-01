@@ -7,6 +7,8 @@ import {PathMarkersService} from '../services/path-markers.service';
 import {Vertex} from '../../../shared/interfaces/vertex';
 
 
+const DIRTY_STATES = [VertexState.visited, VertexState.optimalPath, VertexState.inProcess];
+
 @Component({
   selector: 'app-maze-square',
   templateUrl: './maze-square.component.html',
@@ -15,10 +17,11 @@ import {Vertex} from '../../../shared/interfaces/vertex';
   animations: SquareAnimation
 })
 export class MazeSquareComponent implements Vertex, OnInit {
-  private _state: VertexState = VertexState.empty;
 
   boardRow: number;
   boardCol: number;
+
+  private _state: VertexState = VertexState.empty;
 
   constructor(private mouseEvent: MouseEventService,
               private zone: NgZone,
@@ -69,7 +72,13 @@ export class MazeSquareComponent implements Vertex, OnInit {
   }
 
   clearDirty(): void {
-    if (this._state === VertexState.visited || this._state === VertexState.optimalPath || this._state === VertexState.inProcess) {
+    if (DIRTY_STATES.includes(this._state)) {
+      this.state = VertexState.empty;
+    }
+  }
+
+  clearNonPathMarkers(): void {
+    if (!this.isPathMarker) {
       this.state = VertexState.empty;
     }
   }
