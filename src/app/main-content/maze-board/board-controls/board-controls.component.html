@@ -1,0 +1,12 @@
+<div class="controls m-3">
+  <div ngbDropdown class="d-inline-block me-3" placement="bottom">
+    <button class="btn btn-primary" id="algorithmsDropdown" ngbDropdownToggle>{{currentAlgorithm}}</button>
+    <div ngbDropdownMenu aria-labelledby="algorithmsDropdown" class="dropdown-menu-primary">
+      <button ngbDropdownItem *ngFor="let alg of algorithms" (click)="pathFindAlgorithm = alg">{{alg}}</button>
+    </div>
+  </div>
+
+  <button class="btn btn-success me-3" (click)="findPath()">Find path</button>
+  <button class="btn btn-danger me-3" (click)="clear('path')">Clear path</button>
+  <button class="btn btn-danger me-3" (click)="clear('all')">Clear all</button>
+</div>

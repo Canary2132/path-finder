@@ -21,6 +21,7 @@ import {DijkstraAlgorithm} from '../algorithms/dijkstra';
 import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 import {PathMarkersService} from './services/path-markers.service';
 import {ToastService} from '../../shared/components/toast/toast.service';
+import {ControlActionEventClear, ControlActionEventsRun} from '../../shared/interfaces/control-action-events';
 
 @Component({
   selector: 'app-maze-board',
@@ -59,6 +60,19 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.setDefaultPath();
   }
 
+  handleControlActions(event: ControlActionEventsRun | ControlActionEventClear): void {
+    switch (event.type) {
+      case 'findPath': {
+        this.runDijkstra();
+        break;
+      }
+      case 'clear': {
+        this.clear(event.clearObject);
+        break;
+      }
+    }
+  }
+
   private setVertexData(): void{
     this.vertices.toArray().forEach((vertex, i) => {
       vertex.boardRow = Math.floor(i / this.colsAmount);
@@ -82,7 +96,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   runDijkstra(): void {
-    this.clearPath();
+    this.clear('path');
     this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
     this.handleAlgorithmEvents();
     DijkstraAlgorithm.run(this.graph);
@@ -126,20 +140,15 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.isPainting = false;
   }
 
-  clearPath(): void {
+  clear(objectToClear: 'path' | 'all') {
     if (this.isPainting) {
       this.stopPainting();
     }
-
-    this.vertices.forEach(cell => cell.clearDirty());
-  }
-
-  clearAll(): void {
-    if (this.isPainting) {
-      this.stopPainting();
+    if (objectToClear === 'path') {
+      this.vertices.forEach(cell => cell.clearDirty());
+    } else if (objectToClear === 'all') {
+      this.vertices.forEach(cell => cell.clearNonPathMarkers());
     }
-
-    this.vertices.forEach(cell => cell.clearNonPathMarkers());
   }
 
   boardSquaresCounter(number: number): Array<any>{
