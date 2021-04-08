@@ -7,10 +7,18 @@ import {Vertex} from '../../../shared/interfaces/vertex';
 })
 export class PathMarkersService {
 
-  private _startMarker;
-  private _finishMarker;
+  private _startMarker: Vertex;
+  private _finishMarker: Vertex;
 
   constructor() { }
+
+  get startMarker(): Vertex {
+    return this._startMarker;
+  }
+
+  get finishMarker(): Vertex {
+    return this._finishMarker;
+  }
 
   set newStart(vertex: Vertex) {
     if (vertex.state !== VertexState.finish) {

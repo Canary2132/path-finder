@@ -1,11 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {ControlActionEventClear, ControlActionEventsRun} from '../../../shared/interfaces/control-action-events';
-
-enum PathFindAlgorithm {
-  Dijkstra = 'Dijkstra Algorithm',
-  AStar = 'A* Search',
-  Swarm = 'Swarm Algorithm'
-}
+import {PathFindAlgorithm} from '../../../shared/enums/path-find-algorithm.enum';
 
 @Component({
   selector: 'app-board-controls',
@@ -14,10 +9,10 @@ enum PathFindAlgorithm {
 })
 export class BoardControlsComponent implements OnInit {
 
-  @Output('actionEvent') actionEvent: EventEmitter<ControlActionEventsRun | ControlActionEventClear> = new EventEmitter();
+  @Output() actionEvent: EventEmitter<ControlActionEventsRun | ControlActionEventClear> = new EventEmitter();
 
   algorithms = [PathFindAlgorithm.Dijkstra, PathFindAlgorithm.AStar, PathFindAlgorithm.Swarm];
-  currentAlgorithm: PathFindAlgorithm = PathFindAlgorithm.Dijkstra;
+  currentAlgorithm: PathFindAlgorithm = PathFindAlgorithm.AStar;
 
   constructor() { }
 

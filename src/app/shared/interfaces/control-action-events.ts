@@ -1,6 +1,8 @@
+import {PathFindAlgorithm} from '../enums/path-find-algorithm.enum';
+
 export interface ControlActionEventsRun{
   type: 'findPath';
-  algorithmName: string;
+  algorithmName: PathFindAlgorithm;
 }
 
 export interface ControlActionEventClear{

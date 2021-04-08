@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, NgZone,
+  ElementRef, EventEmitter, NgZone,
   OnInit,
   QueryList,
   ViewChild,
@@ -22,6 +22,8 @@ import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorit
 import {PathMarkersService} from './services/path-markers.service';
 import {ToastService} from '../../shared/components/toast/toast.service';
 import {ControlActionEventClear, ControlActionEventsRun} from '../../shared/interfaces/control-action-events';
+import {AStar} from '../algorithms/a-star';
+import {PathFindAlgorithm} from '../../shared/enums/path-find-algorithm.enum';
 
 @Component({
   selector: 'app-maze-board',
@@ -63,7 +65,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   handleControlActions(event: ControlActionEventsRun | ControlActionEventClear): void {
     switch (event.type) {
       case 'findPath': {
-        this.runDijkstra();
+        this.runAlgorithm(event.algorithmName);
         break;
       }
       case 'clear': {
@@ -73,7 +75,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private setVertexData(): void{
+  private setVertexData(): void {
     this.vertices.toArray().forEach((vertex, i) => {
       vertex.boardRow = Math.floor(i / this.colsAmount);
       vertex.boardCol = i % this.colsAmount;
@@ -95,16 +97,37 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     });
   }
 
-  runDijkstra(): void {
+  private runAlgorithm(name: PathFindAlgorithm): void {
     this.clear('path');
+
+    switch (name) {
+      case PathFindAlgorithm.AStar: {
+        this.runAStar();
+        break;
+      }
+      case PathFindAlgorithm.Dijkstra: {
+        this.runDijkstra();
+        break;
+      }
+    }
+  }
+
+  private runDijkstra(): void {
     this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
-    this.handleAlgorithmEvents();
+    this.handleAlgorithmEvents(DijkstraAlgorithm.event);
     DijkstraAlgorithm.run(this.graph);
   }
 
-  private handleAlgorithmEvents(): void {
+  private runAStar(): void {
+    this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
+    this.handleAlgorithmEvents(AStar.event);
+    AStar.run(this.graph, this.pathMarkers.startMarker, this.pathMarkers.finishMarker);
+  }
+
+  private handleAlgorithmEvents(algorithmEvents: EventEmitter<UpdateVertexEvent | CompletedEvent>): void {
     this.algorithmEvents$?.unsubscribe();
-    this.algorithmEvents$ = DijkstraAlgorithm.event
+    this.algorithmEvents$ = algorithmEvents
+    // this.algorithmEvents$ = DijkstraAlgorithm.event
       .subscribe((e) => {
         if (e.type === 'updateVertex') {
           this.addToPaintQueue(e.data);

@@ -1,17 +1,3 @@
-<!--<div class="controls m-3">-->
-<!--  <div ngbDropdown class="d-inline-block me-3">-->
-<!--    <button class="btn btn-primary" id="dropdownBasic1" ngbDropdownToggle>Toggle dropdown</button>-->
-<!--    <div ngbDropdownMenu aria-labelledby="dropdownBasic1" class="dropdown-menu-primary">-->
-<!--      <button ngbDropdownItem>Action - 1</button>-->
-<!--      <button ngbDropdownItem>Another Action</button>-->
-<!--      <button ngbDropdownItem>Something else is here</button>-->
-<!--    </div>-->
-<!--  </div>-->
-
-<!--  <button class="btn btn-success me-3" (click)="runDijkstra()">Find path</button>-->
-<!--  <button class="btn btn-danger me-3" (click)="clearPath()">Clear path</button>-->
-<!--  <button class="btn btn-danger me-3" (click)="clearAll()">Clear all</button>-->
-<!--</div>-->
 <app-board-controls (actionEvent)="handleControlActions($event)"></app-board-controls>
 
 <div class="board" [class.blocked]="isPainting">

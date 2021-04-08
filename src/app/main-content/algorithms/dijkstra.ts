@@ -14,7 +14,6 @@ export class DijkstraAlgorithm {
   private static isFinishFound = false;
 
   static run(graph: Map<Vertex, Set<Vertex>>): void {
-    this.isFinishFound = false;
     this.setInitialData(graph);
 
     while (!this.isFinishFound && this.unvisitedVertices.length) {
@@ -22,6 +21,21 @@ export class DijkstraAlgorithm {
     }
 
     this.event.emit({type: 'complete', isFinishFound: this.isFinishFound});
+  }
+
+  private static setInitialData(graph: Map<Vertex, Set<Vertex>>): void {
+    this.isFinishFound = false;
+    this.graph = graph;
+    const vertices = Array.from(graph.keys());
+    this.distanceFromStart = new Map();
+    this.previousVertex = new Map();
+    this.unvisitedVertices = [];
+
+    vertices.forEach(vertex => {
+      this.distanceFromStart.set(vertex, vertex.state === VertexState.start ? 0 : Infinity);
+      this.previousVertex.set(vertex, null);
+      this.unvisitedVertices.push(vertex);
+    });
   }
 
   private static processDijkstraStep(): void {
@@ -43,29 +57,20 @@ export class DijkstraAlgorithm {
     this.markVertex(vertex, VertexState.visited);
   }
 
-  private static setInitialData(graph: Map<Vertex, Set<Vertex>>): void {
-    this.graph = graph;
-    const vertices = Array.from(graph.keys());
-    this.distanceFromStart = new Map();
-    this.previousVertex = new Map();
-    this.unvisitedVertices = [];
-
-    vertices.forEach(vertex => {
-      this.distanceFromStart.set(vertex, vertex.state === VertexState.start ? 0 : Infinity);
-      this.previousVertex.set(vertex, null);
-      this.unvisitedVertices.push(vertex);
-    });
-  }
 
   private static updateNeighborVerticesData(currentVertex: Vertex): void {
-    // todo add opportunity to work with distances other than 1
     const neighbors = this.graph.get(currentVertex);
     neighbors.forEach(neighborVertex => {
-      if (this.distanceFromStart.get(neighborVertex) === Infinity && this.unvisitedVertices.includes(neighborVertex)) {
-        this.distanceFromStart.set(neighborVertex, 1);
+      const alternativeDistanceToNeighbor = this.distanceFromStart.get(currentVertex) + this.edgeWeight(currentVertex, neighborVertex);
+      if (alternativeDistanceToNeighbor < this.distanceFromStart.get(neighborVertex)) {
+        this.distanceFromStart.set(neighborVertex, alternativeDistanceToNeighbor);
         this.previousVertex.set(neighborVertex, currentVertex);
       }
     });
+  }
+
+  private static edgeWeight(vertex1, vertex2): number {
+    return 1;
   }
 
   private static markOptimalPath(lastVertex: Vertex): void {
@@ -85,8 +90,6 @@ export class DijkstraAlgorithm {
 
   private static getClosestVertex(): Vertex {
     return this.unvisitedVertices.sort((a, b) => {
-      if (this.distanceFromStart.get(a) === null) return 1;
-      if (this.distanceFromStart.get(b) === null) return -1;
       return this.distanceFromStart.get(a) - this.distanceFromStart.get(b);
     })[0];
   }
