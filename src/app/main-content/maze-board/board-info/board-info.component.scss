@@ -1,0 +1,29 @@
+.info-trigger{
+  width: 30px;
+  height: 30px;
+  background: no-repeat center center url("../../../../scss/icons/info_icon.svg");
+  background-size: contain;
+  cursor: pointer;
+  z-index: 1;
+  position: relative;
+}
+
+
+.info-text{
+  min-width: 220px;
+  background: white;
+  box-shadow: #000000 0 0 3px;
+  top: 15px;
+  right: 30px;
+  padding: 10px;
+  user-select: none;
+  position: absolute;
+  overflow: hidden;
+
+
+  .header{
+    font-weight: bold;
+    text-align: center;
+  }
+}
+

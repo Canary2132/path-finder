@@ -1,0 +1,37 @@
+<div class="info-trigger" (click)="toggleInfo()"></div>
+
+<div class="info-text" *ngIf="showInfoText" [@inOutAnimation]>
+  <div class="header mb-3">Board tooltip</div>
+  <div class="body">
+    <div class="row">
+      <div class="col d-flex justify-content-between px-4 mb-2">
+        <span>Start marker</span>
+        <div class="ms-3 board-square start"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-between px-4 mb-2">
+        <span>Finish marker</span>
+        <div class="ms-3 board-square finish"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-between px-4 mb-2">
+        <span>Visited node</span>
+        <div class="ms-3 board-square visited"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-between px-4 mb-2">
+        <span>Wall node</span>
+        <div class="ms-3 board-square wall"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col d-flex justify-content-between px-4 mb-2">
+        <span>Founded path</span>
+        <div class="ms-3 board-square optimalPath"></div>
+      </div>
+    </div>
+  </div>
+</div>

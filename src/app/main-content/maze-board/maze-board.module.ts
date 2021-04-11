@@ -5,15 +5,17 @@ import { MazeSquareComponent } from './maze-square/maze-square.component';
 import {MouseEventService} from './services/mouse-event.service';
 import {FormsModule} from '@angular/forms';
 import {PathMarkersService} from './services/path-markers.service';
-import {NgbDropdownModule, NgbToastModule} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdownModule, NgbPopoverModule} from '@ng-bootstrap/ng-bootstrap';
 import { BoardControlsComponent } from './board-controls/board-controls.component';
+import { BoardInfoComponent } from './board-info/board-info.component';
 
 @NgModule({
-  declarations: [MazeBoardComponent, MazeSquareComponent, BoardControlsComponent],
+  declarations: [MazeBoardComponent, MazeSquareComponent, BoardControlsComponent, BoardInfoComponent],
     imports: [
-        CommonModule,
-        FormsModule,
-        NgbDropdownModule
+      CommonModule,
+      FormsModule,
+      NgbDropdownModule,
+      NgbPopoverModule
     ],
   providers: [MouseEventService,
               PathMarkersService],

@@ -1,0 +1,52 @@
+$size: 20px;
+
+.board-square{
+  width: $size;
+  height: $size;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 9px;
+
+  &.start{
+    background: #00ff1d;
+    position: relative;
+
+    &:before{
+      content: '➤';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+    }
+  }
+  &.finish{
+    background: #cd3208;
+    position: relative;
+
+    &:before{
+      content: '🞅';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+    }
+  }
+
+  &.visited{
+    background: #61d6ff;
+  }
+  &.wall{
+    background: #141b56;
+  }
+  &.optimalPath{
+    background: #ffde21;
+  }
+}
+
+
+

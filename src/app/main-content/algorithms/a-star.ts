@@ -47,7 +47,7 @@ export class AStar {
 
   private static processVertex(vertex: Vertex): void {
     this.markVertex(vertex, VertexState.inProcess);
-    this.verticesToOpen = this.verticesToOpen.filter(el => el === vertex);
+    this.verticesToOpen = this.verticesToOpen.filter(el => el !== vertex);
     this.markVertex(vertex, VertexState.visited);
   }
 
