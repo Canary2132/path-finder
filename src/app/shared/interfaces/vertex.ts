@@ -4,4 +4,5 @@ export interface Vertex {
   boardRow: number;
   boardCol: number;
   state: VertexState;
+  isPathMarker: boolean;
 }

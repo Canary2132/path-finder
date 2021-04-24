@@ -9,3 +9,9 @@ export interface ControlActionEventClear{
   type: 'clear';
   clearObject: 'path' | 'all';
 }
+
+export interface ControlActionCreateMaze{
+  type: 'createMaze';
+}
+
+export type ControlAction = ControlActionEventsRun | ControlActionEventClear | ControlActionCreateMaze;

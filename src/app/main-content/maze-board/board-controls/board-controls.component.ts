@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {ControlActionEventClear, ControlActionEventsRun} from '../../../shared/interfaces/control-action-events';
+import {ControlAction, ControlActionEventClear, ControlActionEventsRun} from '../../../shared/interfaces/control-action-events';
 import {PathFindAlgorithm} from '../../../shared/enums/path-find-algorithm.enum';
 
 @Component({
@@ -9,9 +9,9 @@ import {PathFindAlgorithm} from '../../../shared/enums/path-find-algorithm.enum'
 })
 export class BoardControlsComponent implements OnInit {
 
-  @Output() actionEvent: EventEmitter<ControlActionEventsRun | ControlActionEventClear> = new EventEmitter();
+  @Output() actionEvent: EventEmitter<ControlAction> = new EventEmitter();
 
-  algorithms = [PathFindAlgorithm.Dijkstra, PathFindAlgorithm.AStar, PathFindAlgorithm.Swarm];
+  algorithms = [PathFindAlgorithm.Dijkstra, PathFindAlgorithm.AStar];
   currentAlgorithm: PathFindAlgorithm = PathFindAlgorithm.AStar;
 
   constructor() { }
@@ -21,6 +21,10 @@ export class BoardControlsComponent implements OnInit {
 
   findPath(): void {
     this.actionEvent.emit({type: 'findPath', algorithmName: this.currentAlgorithm});
+  }
+
+  createMaze(): void {
+    this.actionEvent.emit({type: 'createMaze'});
   }
 
   clear(objectToClear: 'path' | 'all'): void {

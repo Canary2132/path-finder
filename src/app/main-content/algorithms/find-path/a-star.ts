@@ -1,10 +1,10 @@
-import {Vertex} from '../../shared/interfaces/vertex';
+import {Vertex} from '../../../shared/interfaces/vertex';
 import {EventEmitter} from '@angular/core';
-import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
-import {VertexState} from '../../shared/enums/vertex-state.enum';
+import {CompletedEvent, UpdateVertexEvent} from '../../../shared/interfaces/algorithm-event';
+import {VertexState} from '../../../shared/enums/vertex-state.enum';
 
 export class AStar {
-  static event: EventEmitter<UpdateVertexEvent | CompletedEvent> = new EventEmitter<any>();
+  static event: EventEmitter<UpdateVertexEvent | CompletedEvent> = new EventEmitter();
 
   private static previousVertex: Map<Vertex, Vertex>;
   private static distanceFromStart: Map<Vertex, number>;

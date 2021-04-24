@@ -97,7 +97,7 @@ export class MazeSquareComponent implements Vertex, OnInit {
     this.cd.detectChanges();
   }
 
-  private get isPathMarker(): boolean {
+  get isPathMarker(): boolean {
     return this._state === VertexState.start || this._state === VertexState.finish;
   }
 

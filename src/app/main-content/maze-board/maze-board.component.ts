@@ -3,27 +3,27 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, EventEmitter, NgZone,
+  EventEmitter,
+  NgZone,
   OnInit,
   QueryList,
-  ViewChild,
   ViewChildren
 } from '@angular/core';
-import {concat, from, fromEvent, of, Subscription} from 'rxjs';
+import {from, fromEvent, of} from 'rxjs';
 import {MouseEventService, MouseState} from './services/mouse-event.service';
 import {MazeSquareComponent} from './maze-square/maze-square.component';
 import {GraphCreator} from '../../shared/graph-creator';
-import {delayTimer} from '../../shared/helper';
 import {VertexState} from '../../shared/enums/vertex-state.enum';
 import {Vertex} from '../../shared/interfaces/vertex';
-import {concatMap, delay, filter, last, takeLast} from 'rxjs/operators';
-import {DijkstraAlgorithm} from '../algorithms/dijkstra';
+import {concatMap, delay} from 'rxjs/operators';
+import {DijkstraAlgorithm} from '../algorithms/find-path/dijkstra';
 import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 import {PathMarkersService} from './services/path-markers.service';
 import {ToastService} from '../../shared/components/toast/toast.service';
-import {ControlActionEventClear, ControlActionEventsRun} from '../../shared/interfaces/control-action-events';
-import {AStar} from '../algorithms/a-star';
+import {ControlAction, ControlActionEventClear, ControlActionEventsRun} from '../../shared/interfaces/control-action-events';
+import {AStar} from '../algorithms/find-path/a-star';
 import {PathFindAlgorithm} from '../../shared/enums/path-find-algorithm.enum';
+import {RecursiveDivision} from '../algorithms/create-maze/recursive-division';
 
 @Component({
   selector: 'app-maze-board',
@@ -41,7 +41,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private graph: Map<Vertex, Set<Vertex>>;
 
   private paintQueue$;
-  private paintQueue = [];
+  private paintQueue: {vertex: Vertex, newState: VertexState}[] = [];
 
   isPainting = false;
 
@@ -62,10 +62,15 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.setDefaultPath();
   }
 
-  handleControlActions(event: ControlActionEventsRun | ControlActionEventClear): void {
+  handleControlActions(event: ControlAction): void {
     switch (event.type) {
       case 'findPath': {
         this.runAlgorithm(event.algorithmName);
+        break;
+      }
+      case 'createMaze': {
+        this.handleAlgorithmEvents(RecursiveDivision.event);
+        RecursiveDivision.createMaze(this.vertices.toArray(), this.colsAmount, this.rowsAmount);
         break;
       }
       case 'clear': {
@@ -99,6 +104,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   private runAlgorithm(name: PathFindAlgorithm): void {
     this.clear('path');
+    this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
 
     switch (name) {
       case PathFindAlgorithm.AStar: {
@@ -113,13 +119,11 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   }
 
   private runDijkstra(): void {
-    this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
     this.handleAlgorithmEvents(DijkstraAlgorithm.event);
     DijkstraAlgorithm.run(this.graph);
   }
 
   private runAStar(): void {
-    this.graph = GraphCreator.fromBoard(this.vertices.toArray(), this.rowsAmount, this.colsAmount);
     this.handleAlgorithmEvents(AStar.event);
     AStar.run(this.graph, this.pathMarkers.startMarker, this.pathMarkers.finishMarker);
   }
@@ -127,7 +131,6 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
   private handleAlgorithmEvents(algorithmEvents: EventEmitter<UpdateVertexEvent | CompletedEvent>): void {
     this.algorithmEvents$?.unsubscribe();
     this.algorithmEvents$ = algorithmEvents
-    // this.algorithmEvents$ = DijkstraAlgorithm.event
       .subscribe((e) => {
         if (e.type === 'updateVertex') {
           this.addToPaintQueue(e.data);
@@ -163,7 +166,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
     this.isPainting = false;
   }
 
-  clear(objectToClear: 'path' | 'all') {
+  clear(objectToClear: 'path' | 'all'): void {
     if (this.isPainting) {
       this.stopPainting();
     }
