@@ -1,4 +1,14 @@
 $border: 1px solid #6a94d2;
+$controlsHeight: 70px;
+$controlsBottomMargin: 20px;
+
+.controls{
+  height: $controlsHeight;
+  margin-bottom: $controlsBottomMargin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .info{
   position: absolute;
@@ -7,22 +17,29 @@ $border: 1px solid #6a94d2;
   z-index: 1;
 }
 
-.board{
-  margin: 50px;
-  border-left: $border;
-  border-top: $border;
-  width: min-content;
+.board-wrap{
+  height: calc(100% - #{$controlsHeight} - #{$controlsBottomMargin});
+  display: flex;
+  justify-content: center;
+  align-items: self-start;
 
-  .board-row{
-    display: flex;
+  .board{
+    border-left: $border;
+    border-top: $border;
+    width: min-content;
 
-    .cell{
-      border-bottom: $border;
-      border-right: $border;
+    .board-row{
+      display: flex;
+
+      .cell{
+        border-bottom: $border;
+        border-right: $border;
+      }
+    }
+
+    &.blocked{
+      pointer-events: none;
     }
   }
-
-  &.blocked{
-    pointer-events: none;
-  }
 }
+

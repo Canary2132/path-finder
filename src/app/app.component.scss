@@ -1,9 +1,12 @@
+$header-height: 60px;
+
 header{
   font-size: 26px;
   color: white;
   background: #007bff;
   padding: 10px 20px;
   font-weight: bold;
+  height: $header-height;
 }
 
 .toast{
@@ -11,4 +14,8 @@ header{
   top: 10%;
   left: 50%;
   transform: translateX(-50%);
+}
+
+main{
+  height: calc(100% - #{$header-height});
 }

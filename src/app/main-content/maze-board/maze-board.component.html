@@ -1,19 +1,21 @@
-<div class="row">
+<div class="row h-100">
   <div class="col position-relative">
-    <app-board-controls (actionEvent)="handleControlActions($event)"></app-board-controls>
+    <div class="controls">
+      <app-board-controls (actionEvent)="handleControlActions($event)"></app-board-controls>
+    </div>
 
     <div class="info">
       <app-board-info></app-board-info>
     </div>
-
-    <div class="board" [class.blocked]="isPainting">
-      <div class="board-row" *ngFor="let row of boardSquaresCounter(rowsAmount)">
-        <ng-container *ngFor="let square of boardSquaresCounter(colsAmount)">
-          <div class="cell">
-            <app-maze-square #vertices></app-maze-square>
-          </div>
-        </ng-container>
+    <div class="board-wrap" #boardWrap>
+      <div class="board" [class.blocked]="isPainting">
+        <div class="board-row" *ngFor="let row of boardSquaresCounter(rowsAmount)">
+            <div class="cell" *ngFor="let square of boardSquaresCounter(colsAmount)">
+              <app-maze-square #vertices></app-maze-square>
+            </div>
+        </div>
       </div>
     </div>
+
   </div>
 </div>

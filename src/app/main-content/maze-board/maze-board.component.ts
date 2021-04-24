@@ -2,11 +2,11 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, ComponentRef, ElementRef,
   EventEmitter,
   NgZone,
   OnInit,
-  QueryList,
+  QueryList, TemplateRef, ViewChild,
   ViewChildren
 } from '@angular/core';
 import {from, fromEvent, of} from 'rxjs';
@@ -24,6 +24,7 @@ import {ControlAction} from '../../shared/interfaces/control-action-events';
 import {AStar} from '../algorithms/find-path/a-star';
 import {PathFindAlgorithm} from '../../shared/enums/path-find-algorithm.enum';
 import {RecursiveDivision} from '../algorithms/create-maze/recursive-division';
+import {floorToEven} from '../../shared/helper';
 
 @Component({
   selector: 'app-maze-board',
@@ -34,6 +35,7 @@ import {RecursiveDivision} from '../algorithms/create-maze/recursive-division';
 export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   @ViewChildren('vertices') vertices: QueryList<MazeSquareComponent>;
+  @ViewChild('boardWrap', {static: true}) boardWrapRef: ElementRef;
 
   rowsAmount = 30;
   colsAmount = 50;
@@ -54,6 +56,13 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
               private toast: ToastService) { }
 
   ngOnInit(): void {
+    console.log(this.boardWrapRef.nativeElement.clientWidth);
+    console.log(this.boardWrapRef.nativeElement.clientHeight);
+    const squareSize = 22;
+    const cols = floorToEven(this.boardWrapRef.nativeElement.clientWidth / squareSize);
+    const rows = floorToEven((this.boardWrapRef.nativeElement.clientHeight - 50) / squareSize);
+    this.colsAmount = cols;
+    this.rowsAmount = rows;
     this.addMouseEvents();
   }
 
