@@ -20,7 +20,7 @@ import {DijkstraAlgorithm} from '../algorithms/find-path/dijkstra';
 import {CompletedEvent, UpdateVertexEvent} from '../../shared/interfaces/algorithm-event';
 import {PathMarkersService} from './services/path-markers.service';
 import {ToastService} from '../../shared/components/toast/toast.service';
-import {ControlAction, ControlActionEventClear, ControlActionEventsRun} from '../../shared/interfaces/control-action-events';
+import {ControlAction} from '../../shared/interfaces/control-action-events';
 import {AStar} from '../algorithms/find-path/a-star';
 import {PathFindAlgorithm} from '../../shared/enums/path-find-algorithm.enum';
 import {RecursiveDivision} from '../algorithms/create-maze/recursive-division';
@@ -69,6 +69,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
         break;
       }
       case 'createMaze': {
+        this.clear('all');
         this.handleAlgorithmEvents(RecursiveDivision.event);
         RecursiveDivision.createMaze(this.vertices.toArray(), this.colsAmount, this.rowsAmount);
         break;

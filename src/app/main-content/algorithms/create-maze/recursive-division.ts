@@ -2,6 +2,7 @@ import {VertexState} from '../../../shared/enums/vertex-state.enum';
 import {EventEmitter} from '@angular/core';
 import {UpdateVertexEvent} from '../../../shared/interfaces/algorithm-event';
 import {Vertex} from '../../../shared/interfaces/vertex';
+import {IChamberData} from '../../../shared/interfaces/maze-generation';
 
 export class RecursiveDivision {
   static event: EventEmitter<UpdateVertexEvent> = new EventEmitter();
@@ -15,66 +16,80 @@ export class RecursiveDivision {
     this.board = board;
     this.totalColumnsAmount = colsAmount;
 
+    const mainChamber = {
+      maxCol: colsAmount - 1,
+      minCol: 0,
+      maxRow: rowsAmount - 1,
+      minRow: 0
+    };
     if (Math.random() > 0.495) {
-      this.createHorizontalWall(colsAmount - 1,  0, rowsAmount - 1, 0);
+      this.divideChamberHorizontally(mainChamber);
     } else {
-      this.createVerticalWall(colsAmount - 1,  0, rowsAmount - 1, 0);
+      this.divideChamberVertically(mainChamber);
     }
   }
 
-  private static createHorizontalWall(maxCol: number,
-                                      minCol: number,
-                                      maxRow: number,
-                                      minRow: number): void {
-    if (maxRow <= minRow || maxCol <= minCol) return;
-
-    const wallRow = this.getWallIndex(minRow, maxRow);
-    const gateCol = this.getGateIndex(minCol, maxCol);
-    for (let i = minCol; i < maxCol + 1; i++) {
-      if (i === gateCol) continue;
-      this.event.emit({type: 'updateVertex',
-                              data: {vertex: this.board[this.totalColumnsAmount * wallRow + i],
-                                      newState: VertexState.wall}});
-    }
-
-    if (wallRow - 1 - minRow > maxCol - minCol) {
-      this.createHorizontalWall(maxCol, minCol, wallRow - 1, minRow);
+  private static divideChamberIntelligently(chamberData: IChamberData): void{
+    if (this.isChamberTall(chamberData)) {
+      this.divideChamberHorizontally(chamberData);
     } else {
-      this.createVerticalWall(maxCol, minCol, wallRow - 1, minRow);
+      this.divideChamberVertically(chamberData);
     }
-    if (maxRow - (wallRow + 1) > maxCol - minCol) {
-      this.createHorizontalWall(maxCol, minCol, maxRow, wallRow + 1);
-    } else {
-      this.createVerticalWall(maxCol, minCol, maxRow, wallRow + 1);
-    }
-
   }
 
-  private static createVerticalWall(maxCol: number,
-                                    minCol: number,
-                                    maxRow: number,
-                                    minRow: number): void {
-    if (maxRow <= minRow || maxCol <= minCol) return;
+  private static divideChamberHorizontally(chamberData: IChamberData): void {
+    if (this.isChamberFlattened(chamberData)) return;
 
-    const wallCol = this.getWallIndex(minCol, maxCol);
-    const gateRow = this.getGateIndex(minRow, maxRow);
-    for (let i = minRow; i < maxRow + 1; i++) {
-      if (i === gateRow) continue;
-      this.event.emit({type: 'updateVertex',
-                              data: {vertex: this.board[this.totalColumnsAmount * i + wallCol],
-                                      newState: VertexState.wall}});
-    }
+    const wallRow = this.getWallIndex(chamberData.minRow, chamberData.maxRow);
+    this.drawHorizontalWall(chamberData, wallRow);
 
-    if (maxRow - minRow > wallCol - 1 - minCol) {
-      this.createHorizontalWall(wallCol - 1, minCol, maxRow, minRow);
-    } else {
-      this.createVerticalWall(wallCol - 1, minCol, maxRow, minRow);
+    const subChamber1 = Object.assign({}, chamberData, {maxRow: wallRow - 1});
+    const subChamber2 = Object.assign({}, chamberData, {minRow: wallRow + 1});
+    this.divideChamberIntelligently(subChamber1);
+    this.divideChamberIntelligently(subChamber2);
+  }
+
+  private static drawHorizontalWall(chamberData: IChamberData, wallRow: number): void{
+    const passageCol = this.getPassageIndex(chamberData.minCol, chamberData.maxCol);
+    for (let i = chamberData.minCol; i < chamberData.maxCol + 1; i++) {
+      if (i === passageCol) continue;
+      this.markVertex(this.board[this.totalColumnsAmount * wallRow + i], VertexState.wall);
     }
-    if (maxRow - minRow > maxCol - (wallCol + 1)) {
-      this.createHorizontalWall(maxCol, wallCol + 1, maxRow, minRow);
-    } else {
-      this.createVerticalWall(maxCol, wallCol + 1, maxRow, minRow);
+  }
+
+  private static divideChamberVertically(chamberData: IChamberData): void {
+    if (this.isChamberFlattened(chamberData)) return;
+
+    const wallCol = this.getWallIndex(chamberData.minCol, chamberData.maxCol);
+    this.drawVerticalWall(chamberData, wallCol);
+
+    const subChamber1 = Object.assign({}, chamberData, {maxCol: wallCol - 1});
+    const subChamber2 = Object.assign({}, chamberData, {minCol: wallCol + 1});
+    this.divideChamberIntelligently(subChamber1);
+    this.divideChamberIntelligently(subChamber2);
+  }
+
+  private static drawVerticalWall(chamberData: IChamberData, wallCol: number): void {
+    const passageRow = this.getPassageIndex(chamberData.minRow, chamberData.maxRow);
+    for (let i = chamberData.minRow; i < chamberData.maxRow + 1; i++) {
+      if (i === passageRow) continue;
+      this.markVertex(this.board[this.totalColumnsAmount * i + wallCol], VertexState.wall);
     }
+  }
+
+  private static isChamberFlattened(chamberData: IChamberData): boolean {
+    return chamberData.maxRow <= chamberData.minRow || chamberData.maxCol <= chamberData.minCol;
+  }
+
+  private static isChamberTall(chamberData: IChamberData): boolean {
+    return chamberData.maxRow - chamberData.minRow > chamberData.maxCol - chamberData.minCol;
+  }
+
+  private static markVertex(vertex: Vertex, state: VertexState): void {
+    const vertexIsPathMarker = vertex.state === VertexState.finish || vertex.state === VertexState.start;
+    const newState = vertexIsPathMarker ? vertex.state : state;
+
+    this.event.emit({type: 'updateVertex', data: {vertex, newState}});
   }
 
   private static getWallIndex(minIndex: number, maxIndex: number): number {
@@ -87,7 +102,7 @@ export class RecursiveDivision {
     return  possibleWalls[randomWallIndex];
   }
 
-  private static getGateIndex(minIndex: number, maxIndex: number): number {
+  private static getPassageIndex(minIndex: number, maxIndex: number): number {
     const possibleGates = [];
     for (let i = minIndex; i <= maxIndex; i++){
       if (i % 2 === 0) continue;
