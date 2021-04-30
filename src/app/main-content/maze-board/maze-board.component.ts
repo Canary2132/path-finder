@@ -32,6 +32,12 @@ import {floorToEven} from '../../shared/helper';
   styleUrls: ['./maze-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
+
+/*todo fix rare error
+   Invalid array length
+    at MazeBoardComponent.boardSquaresCounter
+    at MazeBoardComponent_Template */
+
 export class MazeBoardComponent implements OnInit, AfterViewInit {
 
   @ViewChildren('vertices') vertices: QueryList<MazeSquareComponent>;
@@ -56,13 +62,7 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
               private toast: ToastService) { }
 
   ngOnInit(): void {
-    console.log(this.boardWrapRef.nativeElement.clientWidth);
-    console.log(this.boardWrapRef.nativeElement.clientHeight);
-    const squareSize = 22;
-    const cols = floorToEven(this.boardWrapRef.nativeElement.clientWidth / squareSize);
-    const rows = floorToEven((this.boardWrapRef.nativeElement.clientHeight - 50) / squareSize);
-    this.colsAmount = cols;
-    this.rowsAmount = rows;
+    this.setBoardSquaresAmount();
     this.addMouseEvents();
   }
 
@@ -88,6 +88,14 @@ export class MazeBoardComponent implements OnInit, AfterViewInit {
         break;
       }
     }
+  }
+
+  private setBoardSquaresAmount(): void {
+    const squareSize = 22;
+    const cols = floorToEven(this.boardWrapRef.nativeElement.clientWidth / squareSize);
+    const rows = floorToEven((this.boardWrapRef.nativeElement.clientHeight - 50) / squareSize);
+    this.colsAmount = cols;
+    this.rowsAmount = rows;
   }
 
   private setVertexData(): void {
