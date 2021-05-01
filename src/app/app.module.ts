@@ -5,6 +5,7 @@ import {MainContentModule} from './main-content/main-content.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {ToastComponent} from './shared/components/toast/toast.component';
+import {HeaderModule} from './header/header.module';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import {ToastComponent} from './shared/components/toast/toast.component';
     BrowserModule,
     MainContentModule,
     BrowserAnimationsModule,
-    NgbModule
+    NgbModule,
+    HeaderModule
   ],
   providers: [],
   bootstrap: [AppComponent]

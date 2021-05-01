@@ -1,4 +1,8 @@
-//$success: #0eb14f;
+:root {
+  color-scheme: light dark;
+}
+
+@import "custom-variables";
 @import '~bootstrap/scss/bootstrap';
 @import "board-square";
 //@import 'reset.scss';
