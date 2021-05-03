@@ -1,8 +1,8 @@
 :root {
   color-scheme: light dark;
 }
+
 @import "colors";
-@import "animations";
 @import '~bootstrap/scss/bootstrap';
 @import "theme";
 @import "board-square";

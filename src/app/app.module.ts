@@ -6,6 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {ToastComponent} from './shared/components/toast/toast.component';
 import {HeaderModule} from './header/header.module';
+import {UiChangeThemeService} from './shared/services/ui-change-theme.service';
 
 @NgModule({
   declarations: [

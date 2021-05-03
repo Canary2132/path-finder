@@ -1,8 +1,8 @@
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
 
-$main-bg: (#ffffff, #1b1b1b);
+//$main-bg: (#ffffff, #1b1b1b);
+$main-bg: (#ffffff, #6a6f80);
 $secondary-text: (#1b1b1b, #dedede);
 $shadow: (#000000, #ffffff);
 
@@ -21,15 +21,15 @@ $secondary: ($gray-600, $gray-700);
 $light: ($gray-100, $gray-100);
 $dark: ($gray-900, $gray-900);
 
-$board-square-start: (#00ff1d, #03ac14);
-$board-square-finish: (#cd3208, #812406);
-$board-square-visited: ($cyan-500, $cyan-700);
+$board-square-start: (#00ff1d, #00ff1d);
+$board-square-finish: (#cd3208, #cd3208);
+$board-square-visited: (#56e3ff, $cyan-500);
 $board-square-wall: (#141b56, #303fa9);
-$board-square-optimal-path: ($yellow-500, $yellow-700);
-$board-square-border: (#6a94d2, #97a6cd);
+$board-square-optimal-path: ($yellow-500, $yellow-500);
+$board-square-border: (#6a94d2, #92a5bf);
 
 
-$colors: (
+$colors-custom: (
   --main-bg: $main-bg,
   --secondary-text: $secondary-text,
   --shadow: $shadow,

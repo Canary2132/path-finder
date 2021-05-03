@@ -2,10 +2,10 @@
   <span>Pathfinder ↝</span>
 
   <button class="btn btn-light bnt-mode"
-          [ngClass]="{'btn-dark dark-mode': useDarkTheme}"
+          [ngClass]="{'btn-dark dark-mode': isDarkThemeUsed}"
           (click)="changeTheme()">
-    <span class="icon-light" *ngIf="!useDarkTheme" [@iconLight] >🌞</span>
-    <span class="icon-dark" *ngIf="useDarkTheme" [@iconDark]>🌙</span>
-    {{useDarkTheme ? 'Dark' : 'Light'}}
+    <span class="icon-light" [@iconLight]="isDarkThemeUsed ? 'hide' : 'shown'">🌞</span>
+    <span class="icon-dark" [@iconDark]="isDarkThemeUsed ? 'shown' : 'hide'">🌙</span>
+    {{isDarkThemeUsed ? 'Dark' : 'Light'}}
   </button>
 </div>
