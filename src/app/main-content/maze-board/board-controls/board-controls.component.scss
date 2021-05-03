@@ -1,8 +1,9 @@
+@import "./../../../../scss/colors";
 $dropdown-width: 250px;
 
 .dropdown{
   .dropdown-menu-primary{
-    background: #0d6efd;
+    background: var(--primary);
     min-width: $dropdown-width;
 
     .dropdown-item{
@@ -11,7 +12,7 @@ $dropdown-width: 250px;
       justify-content: center;
 
       &:hover{
-        color: #0d6efd;
+        color: var(--primary);
       }
     }
   }

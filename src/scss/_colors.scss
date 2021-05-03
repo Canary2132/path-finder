@@ -1,0 +1,63 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+$main-bg: (#ffffff, #1b1b1b);
+$secondary-text: (#1b1b1b, #dedede);
+$shadow: (#000000, #ffffff);
+
+$blue:    ($blue-500, $blue-700);
+$indigo:  ($indigo-500, $indigo-700);
+$purple:  ($purple-500, $purple-700);
+$pink:    ($pink-500, $pink-700);
+$red:     ($red-500, $red-700);
+$orange:  ($orange-500, $orange-700);
+$yellow:  ($yellow-500, $yellow-700);
+$green:   ($green-500, $green-700);
+$teal:    ($teal-500, $teal-700);
+$cyan:    ($cyan-500, $cyan-700);
+
+$secondary: ($gray-600, $gray-700);
+$light: ($gray-100, $gray-100);
+$dark: ($gray-900, $gray-900);
+
+$board-square-start: (#00ff1d, #03ac14);
+$board-square-finish: (#cd3208, #812406);
+$board-square-visited: ($cyan-500, $cyan-700);
+$board-square-wall: (#141b56, #303fa9);
+$board-square-optimal-path: ($yellow-500, $yellow-700);
+$board-square-border: (#6a94d2, #97a6cd);
+
+
+$colors: (
+  --main-bg: $main-bg,
+  --secondary-text: $secondary-text,
+  --shadow: $shadow,
+
+  --primary: $blue,
+  --secondary: $secondary,
+  --success: $green,
+  --info: $cyan,
+  --warning: $yellow,
+  --danger: $red,
+  --light: $light,
+  --dark: $dark,
+
+  --BS-border: $board-square-border,
+  --BS-start: $board-square-start,
+  --BS-finish: $board-square-finish,
+  --BS-visited: $board-square-visited,
+  --BS-wall: $board-square-wall,
+  --BS-opt-path: $board-square-optimal-path,
+);
+
+$theme-colors-custom: (
+  "primary": $blue,
+  "secondary": $secondary,
+  "success": $green,
+  "info": $cyan,
+  "warning": $yellow,
+  "danger": $red,
+  "light": $light,
+  "dark": $dark,
+);

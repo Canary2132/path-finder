@@ -1,11 +1,11 @@
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between header">
   <span>Pathfinder ↝</span>
 
-  <button class="btn btn-outline-light bnt-mode"
-          [ngClass]="{'btn-outline-dark dark-mode': useDarkTheme}"
+  <button class="btn btn-light bnt-mode"
+          [ngClass]="{'btn-dark dark-mode': useDarkTheme}"
           (click)="changeTheme()">
-    <span class="icon-light" *ngIf="!useDarkTheme"  >🌞</span>
-    <span class="icon-dark" *ngIf="useDarkTheme" >🌙</span>
+    <span class="icon-light" *ngIf="!useDarkTheme" [@iconLight] >🌞</span>
+    <span class="icon-dark" *ngIf="useDarkTheme" [@iconDark]>🌙</span>
     {{useDarkTheme ? 'Dark' : 'Light'}}
   </button>
 </div>

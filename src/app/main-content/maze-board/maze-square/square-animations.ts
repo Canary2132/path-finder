@@ -3,7 +3,7 @@ import {animate, keyframes, state, style, transition, trigger} from '@angular/an
 export const SquareAnimation = [
     trigger('square', [
     state('visited', style({
-      background: '#61d6ff',
+      // background: '#61d6ff',
       transform: 'scale(1.0)'
     })),
     transition('* => visited', [
@@ -36,9 +36,9 @@ export const SquareAnimation = [
         })
       ]))
     ]),
-    state('wall', style({
-      background: '#141b56',
-    })),
+    // state('wall', style({
+    //   background: '#141b56',
+    // })),
     transition('empty => wall', [
       animate('0.4s', keyframes([
         style({
@@ -61,7 +61,7 @@ export const SquareAnimation = [
     transition('wall => empty', [
       animate('0.4s', keyframes([
         style({
-          background: '#141b56',
+          // background: '#141b56',
           transform: 'scale(1)',
           offset: 0.1
         }),
@@ -77,9 +77,9 @@ export const SquareAnimation = [
         })
       ]))
     ]),
-    state('optimalPath', style({
-      background: '#ffde21',
-    })),
+    // state('optimalPath', style({
+    //   background: '#ffde21',
+    // })),
     transition('visited => optimalPath', [
       animate('0.4s', keyframes([
         style({

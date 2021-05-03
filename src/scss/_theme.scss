@@ -1,0 +1,45 @@
+@import "colors";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/buttons";
+
+.theme-light {
+
+  @each $name, $color in $colors { // generate css variables
+    #{$name}: nth($color, 1);
+  }
+
+  @each $color, $value in $theme-colors-custom { // redefine bootstrap buttons classes
+    .btn-#{$color} {
+      @include button-variant(nth($value, 1), nth($value, 1));
+    }
+  }
+
+  @each $color, $value in $theme-colors-custom { // redefine bootstrap buttons-outline classes
+    .btn-outline-#{$color} {
+      @include button-outline-variant(nth($value, 1));
+    }
+  }
+}
+
+.theme-dark {
+
+  @each $name, $color in $colors { // generate css variables
+    #{$name}: nth($color, 2);
+  }
+
+  @each $color, $value in $theme-colors-custom { // redefine bootstrap buttons classes
+    .btn-#{$color} {
+      @include button-variant(nth($value, 2), nth($value, 2));
+    }
+  }
+
+  @each $color, $value in $theme-colors-custom { // redefine bootstrap buttons-outline classes
+    .btn-outline-#{$color} {
+      @include button-outline-variant(nth($value, 2));
+    }
+  }
+}
+
+

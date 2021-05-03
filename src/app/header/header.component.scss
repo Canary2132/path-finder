@@ -1,10 +1,24 @@
-.bnt-mode{
-  width: 5.5rem;
-  position: relative;
-  padding-left: 2.4rem;
+@import "../../scss/variables";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "../../scss/colors";
 
-  .icon-dark, .icon-light{
-    position: absolute;
-    left: 0.6rem;
+.header{
+  font-size: 26px;
+  color: white;
+  background: var(--primary);
+  padding: 10px 20px;
+  font-weight: bold;
+  height: $header-height;
+
+  .bnt-mode{
+    width: 5.5rem;
+    position: relative;
+    padding-left: 2.4rem;
+
+    .icon-dark, .icon-light{
+      position: absolute;
+      left: 0.6rem;
+    }
   }
 }
